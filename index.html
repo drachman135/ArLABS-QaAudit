@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warung Muchsin Assegaf - Menu Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #faf9f6; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="pb-32">
+
+  <div class="bg-rose-950 text-white pt-7 pb-8 px-4 rounded-b-[2.5rem] shadow-lg text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-radial from-transparent to-black/30 opacity-40"></div>
+    <div class="relative z-10">
+      <span class="bg-amber-400 text-rose-950 font-black text-[10px] tracking-widest px-3 py-1 rounded-full uppercase">🔥 KATERING & SEBLAK TULANGAN</span>
+      <h1 class="text-2xl font-black text-amber-400 mt-2 tracking-tight">WARUNG MUCHSIN ASSEGAF</h1>
+      <p class="text-xs text-rose-200 mt-1 font-medium">Buka Jam 10:00 - 21:00 WIB • Pengiriman Cepat & Mantap</p>
+    </div>
+  </div>
+
+  <div class="max-w-md mx-auto px-4 mt-6 space-y-6">
+    <div class="space-y-3">
+      <input type="text" id="pencarianMenu" oninput="filterDanTampilkanMenu()" placeholder="Cari seblak, minuman segar..." class="w-full p-3 bg-white shadow-sm border border-neutral-100 rounded-2xl text-xs font-semibold outline-none focus:border-rose-950 transition">
+      <div class="flex gap-1.5 overflow-x-auto no-scrollbar py-1">
+        <button onclick="setKategoriAktif('semua')" id="cat-semua" class="cat-btn px-4 py-2 bg-rose-950 text-amber-400 text-xs font-bold rounded-xl shadow-sm transition flex-shrink-0">✨ Semua Jajanan</button>
+        <button onclick="setKategoriAktif('makanan')" id="cat-makanan" class="cat-btn px-4 py-2 bg-white text-neutral-600 border border-neutral-100 text-xs font-bold rounded-xl shadow-sm transition flex-shrink-0">🍲 Makanan</button>
+        <button onclick="setKategoriAktif('minuman')" id="cat-minuman" class="cat-btn px-4 py-2 bg-white text-neutral-600 border border-neutral-100 text-xs font-bold rounded-xl shadow-sm transition flex-shrink-0">🍹 Minuman</button>
+        <button onclick="setKategoriAktif('cemilan')" id="cat-cemilan" class="cat-btn px-4 py-2 bg-white text-neutral-600 border border-neutral-100 text-xs font-bold rounded-xl shadow-sm transition flex-shrink-0">🍿 Cemilan</button>
+      </div>
+    </div>
+
+    <div id="containerMenuUtama" class="space-y-3">
+      </div>
+  </div>
+
+  <div id="flyingCart" class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white p-4 rounded-t-[2rem] shadow-[0_-10px_30px_rgba(0,0,0,0.08)] border-t border-neutral-100 z-50 transform translate-y-full transition-transform duration-300">
+    <div id="cartStage1" class="space-y-4">
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="text-[10px] font-bold text-neutral-400 uppercase">Total Pesanan Lu</p>
+          <p id="txtTotalHarga" class="text-base font-black text-rose-950">Rp 0</p>
+        </div>
+        <button onclick="bukaTahapDua()" id="btnMainCartAction" class="bg-rose-950 text-amber-400 font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-rose-900 transition">Lanjut ke Pengiriman ➡️</button>
+      </div>
+    </div>
+
+    <div id="cartStage2" class="hidden space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="text-xs font-black text-neutral-800 uppercase tracking-wider">📍 Info Alamat Kirim</h3>
+        <button onclick="kembaliKeTahapSatu()" class="text-[10px] font-bold text-rose-800">⬅️ Kembali</button>
+      </div>
+      <div class="space-y-2.5">
+        <input type="text" id="pembeliNama" placeholder="Nama Lengkap Lu" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+        <textarea id="pembeliAlamat" placeholder="Alamat Rumah Jelas / Patokan Lokasi" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950 rows-2"></textarea>
+      </div>
+      <button onclick="kirimOrderKeWhatsApp()" class="w-full bg-emerald-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition">Kirim Pesanan ke WA 🚀</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBlZTatONukCKARuviwEUCiDUMuT03nz3U",
+      authDomain: "warungmuchsinassegaf.firebaseapp.com",
+      projectId: "warungmuchsinassegaf",
+      storageBucket: "warungmuchsinassegaf.firebasestorage.app",
+      messagingSenderId: "32676861503",
+      appId: "1:32676861503:web:e35868f9daf6940dbe8a8a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let semuaMenuData = [];
+    let kategoriAktif = "semua";
+    let keranjangBelanja = {};
+
+    // KONFIGURASI JAM BUKA OPERASIONAL (10:00 - 21:00 WIB)
+    const JAM_BUKA = 10;
+    const JAM_TUTUP = 21;
+
+    function periksaJamOperasional() {
+      const sekarang = new Date();
+      // Konversi manual ke GMT+7 (WIB)
+      const jamWIB = (sekarang.getUTCHours() + 7) % 24;
+      const isBuka = jamWIB >= JAM_BUKA && jamWIB < JAM_TUTUP;
+      
+      const btnAction = document.getElementById('btnMainCartAction');
+      if(!isBuka) {
+        btnAction.disabled = true;
+        btnAction.className = "bg-neutral-400 text-neutral-200 font-black px-4 py-3 rounded-xl text-[10px] uppercase cursor-not-allowed w-full text-center shadow-none";
+        btnAction.innerText = `🚨 MAAF WARUNG TUTUP (BUKA ${JAM_BUKA}:00 - ${JAM_TUTUP}:00 WIB)`;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Auto-fill form dari memori lokal HP biar pembeli gak repot ketik ulang alamat
+      if(localStorage.getItem("muchsin_nama")) document.getElementById("pembeliNama").value = localStorage.getItem("muchsin_nama");
+      if(localStorage.getItem("muchsin_alamat")) document.getElementById("pembeliAlamat").value = localStorage.getItem("muchsin_alamat");
+    });
+
+    onSnapshot(query(collection(db, "menu"), orderBy("nama", "asc")), (snap) => {
+      semuaMenuData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      filterDanTampilkanMenu();
+    });
+
+    window.setKategoriAktif = (kat) => {
+      kategoriAktif = kat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.className = "cat-btn px-4 py-2 bg-white text-neutral-600 border border-neutral-100 text-xs font-bold rounded-xl shadow-sm transition flex-shrink-0";
+      });
+      document.getElementById(`cat-${kat}`).className = "cat-btn px-4 py-2 bg-rose-950 text-amber-400 text-xs font-bold rounded-xl shadow-sm transition flex-shrink-0";
+      filterDanTampilkanMenu();
+    };
+
+    window.filterDanTampilkanMenu = () => {
+      const kataKunci = document.getElementById("pencarianMenu").value.toLowerCase();
+      const container = document.getElementById("containerMenuUtama");
+      container.innerHTML = "";
+
+      const filtered = semuaMenuData.filter(m => {
+        const matchKat = kategoriAktif === "semua" || m.kategori === kategoriAktif;
+        const matchKata = m.nama.toLowerCase().includes(kataKunci);
+        return matchKat && matchKata;
+      });
+
+      if(filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-12 text-xs text-neutral-400 font-medium">Jajanan yang lu cari gak ketemu, Coy... 😢</div>`;
+        return;
+      }
+
+      filtered.forEach(m => {
+        const qty = keranjangBelanja[m.id] || 0;
+        const hargaTampil = m.hargaPromo ? m.hargaPromo : m.harga;
+        const formatHarga = new Intl.NumberFormat("id-ID").format(hargaTampil);
+        const formatHargaNormal = m.hargaPromo ? new Intl.NumberFormat("id-ID").format(m.harga) : null;
+        
+        // CHECK STATUS STOK DARI ADMIN SAKLAR
+        const isTersedia = m.tersedia !== false;
+
+        container.innerHTML += `
+          <div class="bg-white p-3 rounded-[2rem] shadow-sm flex items-center gap-4 border border-neutral-100 relative overflow-hidden ${!isTersedia ? 'opacity-50 grayscale' : ''}">
+            ${!isTersedia ? '<div class="absolute inset-0 bg-black/5 z-20 flex items-center justify-center font-black text-rose-950 text-xs tracking-widest uppercase bg-blend-darken">--- STOK HABIS ---</div>' : ''}
+            <img src="${m.foto || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150'}" class="w-20 h-20 object-cover rounded-[1.5rem] bg-neutral-50 flex-shrink-0">
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-neutral-800 text-xs capitalize truncate">${m.nama}</h3>
+              <p class="text-xs font-black text-rose-950 mt-1">
+                Rp ${formatHarga} 
+                ${formatHargaNormal ? `<span class="text-[9px] text-neutral-400 line-through font-normal ml-1">Rp ${formatHargaNormal}</span>` : ''}
+              </p>
+              
+              <div class="flex items-center gap-2.5 mt-3">
+                <button ${!isTersedia ? 'disabled' : ''} onclick="ubahJumlahBelanja('${m.id}', -1)" class="w-7 h-7 bg-neutral-100 rounded-lg text-neutral-700 font-bold text-xs flex items-center justify-center hover:bg-neutral-200 active:scale-95 transition disabled:opacity-30">-</button>
+                <span class="text-xs font-bold text-neutral-700 w-4 text-center">${qty}</span>
+                <button ${!isTersedia ? 'disabled' : ''} onclick="ubahJumlahBelanja('${m.id}', 1)" class="w-7 h-7 bg-rose-950 text-amber-400 rounded-lg font-bold text-xs flex items-center justify-center hover:bg-rose-900 active:scale-95 transition disabled:opacity-30">+</button>
+              </div>
+            </div>
+          </div>`;
+      });
+      hitungRingkasanBelanja();
+    };
+
+    window.ubahJumlahBelanja = (id, delta) => {
+      const current = keranjangBelanja[id] || 0;
+      const hasil = current + delta;
+      if (hasil <= 0) { delete keranjangBelanja[id]; } 
+      else { keranjangBelanja[id] = hasil; }
+      filterDanTampilkanMenu();
+    };
+
+    function hitungRingkasanBelanja() {
+      let total = 0;
+      let totalItem = 0;
+
+      semuaMenuData.forEach(m => {
+        if(keranjangBelanja[m.id]) {
+          const hargaFinal = m.hargaPromo ? m.hargaPromo : m.harga;
+          total += (hargaFinal * keranjangBelanja[m.id]);
+          totalItem += keranjangBelanja[m.id];
+        }
+      });
+
+      const flying = document.getElementById("flyingCart");
+      const txtTotal = document.getElementById("txtTotalHarga");
+
+      if (totalItem > 0) {
+        txtTotal.innerText = `Rp ${new Intl.NumberFormat("id-ID").format(total)}`;
+        flying.classList.remove("translate-y-full");
+        periksaJamOperasional(); // Jalankan proteksi jam tutup pas keranjang keisi
+      } else {
+        flying.classList.add("translate-y-full");
+      }
+    }
+
+    window.bukaTahapDua = () => {
+      document.getElementById("cartStage1").classList.add("hidden");
+      document.getElementById("cartStage2").classList.remove("hidden");
+    };
+
+    window.kembaliKeTahapSatu = () => {
+      document.getElementById("cartStage2").classList.add("hidden");
+      document.getElementById("cartStage1").classList.remove("hidden");
+    };
+
+    window.kirimOrderKeWhatsApp = () => {
+      const nama = document.getElementById("pembeliNama").value.trim();
+      const alamat = document.getElementById("pembeliAlamat").value.trim();
+
+      if(!nama || !alamat) { alert("Biodata kirim wajib diisi lengkap, Coy!"); return; }
+
+      // Simpan memori otomatis
+      localStorage.setItem("muchsin_nama", nama);
+      localStorage.setItem("muchsin_alamat", alamat);
+
+      let teksPesanan = `*PESANAN DIGITAL - WARUNG MUCHSIN*\n`;
+      teksPesanan += `----------------------------------------\n`;
+      teksPesanan += `👤 *Nama Pembeli:* ${nama}\n`;
+      teksPesanan += `📍 *Alamat Kirim:* ${alamat}\n`;
+      teksPesanan += `----------------------------------------\n\n`;
+      teksPesanan += `📦 *DAFTAR JAJANAN:*\n`;
+
+      let grandTotal = 0;
+      semuaMenuData.forEach(m => {
+        if(keranjangBelanja[m.id]) {
+          const hargaFinal = m.hargaPromo ? m.hargaPromo : m.harga;
+          const subTotal = hargaFinal * keranjangBelanja[m.id];
+          grandTotal += subTotal;
+          teksPesanan += `- ${m.nama} (${keranjangBelanja[m.id]}x) = Rp ${new Intl.NumberFormat("id-ID").format(subTotal)}\n`;
+        }
+      });
+
+      teksPesanan += `\n💰 *TOTAL PEMBAYARAN:* *Rp ${new Intl.NumberFormat("id-ID").format(grandTotal)}*\n`;
+      teksPesanan += `----------------------------------------\n`;
+      teksPesanan += `_Mohon segera diproses ya kak, perut udah keroncongan! 🤤_`;
+
+      const nomorWA = "6285641215160"; // Nomor WA Baru Lu
+      const urlWA = `https://api.whatsapp.com/send?phone=${nomorWA}&text=${encodeURIComponent(teksPesanan)}`;
+      window.open(urlWA, '_blank');
+    };
+  </script>
+</body>
+</html>

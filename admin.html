@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Warung Muchsin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#faf9f6] pb-24">
+
+  <div class="bg-rose-950 text-white pt-6 pb-6 px-4 md:px-8 rounded-b-[2rem] shadow-xl w-full">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div class="text-center sm:text-left">
+        <h1 class="text-xl font-black text-amber-400 tracking-tight">PANEL KENDALI UTAMA</h1>
+        <p class="text-xs text-rose-200">Warung Muchsin Assegaf • Manajemen Menu & QR</p>
+      </div>
+      <div class="flex bg-white/10 p-1 rounded-xl gap-1">
+        <button onclick="pindahTab('menu')" id="tabBtn-menu" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold bg-white text-rose-950 shadow-sm transition">📋 Kelola Menu</button>
+        <button onclick="pindahTab('qr')" id="tabBtn-qr" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold text-white hover:bg-white/10 transition">🖼️ Cetak QR</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 mt-6">
+    <div id="tab-menu" class="tab-content space-y-6">
+      <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-neutral-100">
+        <h2 class="text-sm font-black text-neutral-800 uppercase tracking-wider mb-4 flex items-center gap-1.5">✨ Tambah Menu Baru</h2>
+        <form id="formMenu" onsubmit="simpanMenuBaru(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-bold text-neutral-400 uppercase mb-1">Nama Jajanan</label>
+            <input type="text" id="menuNama" required placeholder="Contoh: Seblak Tulangan Naga" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-neutral-400 uppercase mb-1">Kategori</label>
+            <select id="menuKategori" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-bold text-neutral-700 outline-none">
+              <option value="makanan">🍲 Makanan</option>
+              <option value="minuman">🍹 Minuman</option>
+              <option value="cemilan">🍿 Cemilan</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-neutral-400 uppercase mb-1">Harga Normal (Rp)</label>
+            <input type="number" id="menuHarga" required placeholder="Contoh: 15000" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-neutral-400 uppercase mb-1">Harga Promo (Rp) <span class="text-neutral-400 font-normal">*Opsional</span></label>
+            <input type="number" id="menuHargaPromo" placeholder="Kosongkan jika tidak promo" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-[10px] font-bold text-neutral-400 uppercase mb-1">Foto Menu (Disarankan Screenshot HP)</label>
+            <input type="file" id="menuFoto" accept="image/*" class="w-full p-2 bg-neutral-50 border border-dashed rounded-xl text-xs outline-none">
+          </div>
+          <div class="md:col-span-2 pt-2">
+            <button type="submit" class="w-full bg-rose-950 text-amber-400 font-black py-3 rounded-xl text-xs uppercase tracking-wider hover:bg-rose-900 transition shadow-md">Masukkin ke Daftar Menu 🚀</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-neutral-100">
+        <h2 class="text-sm font-black text-neutral-800 uppercase tracking-wider mb-3">📋 Daftar Menu Live di Website</h2>
+        <div id="listAdminMenu" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+      </div>
+    </div>
+
+    <div id="tab-qr" class="tab-content hidden text-center max-w-md mx-auto">
+      <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-neutral-100 flex flex-col items-center">
+        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl font-bold mb-3">🖼️</div>
+        <h2 class="text-base font-black text-neutral-800 mb-1">QR Code Menu Digital Vercel</h2>
+        <p class="text-xs text-neutral-400 mb-6">Pindai QR ini untuk langsung masuk ke ruko baru di <b>warungmuchsin.vercel.app</b></p>
+        
+        <div class="p-4 bg-gradient-to-br from-rose-950 to-red-900 rounded-[2rem] shadow-xl inline-block mb-6 border-4 border-amber-400">
+          <div class="bg-white p-4 rounded-xl shadow-inner">
+            <div id="qrcode" class="flex justify-center"></div>
+          </div>
+          <p class="text-[10px] text-amber-300 font-black tracking-widest uppercase mt-3">SCAN MENU DISINI</p>
+        </div>
+
+        <button onclick="downloadQRCode()" class="w-full bg-neutral-900 text-white font-bold py-3 rounded-xl text-xs tracking-wide uppercase shadow-md active:scale-98 transition">
+          💾 Download Gambar QR Code
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBlZTatONukCKARuviwEUCiDUMuT03nz3U",
+      authDomain: "warungmuchsinassegaf.firebaseapp.com",
+      projectId: "warungmuchsinassegaf",
+      storageBucket: "warungmuchsinassegaf.firebasestorage.app",
+      messagingSenderId: "32676861503",
+      appId: "1:32676861503:web:e35868f9daf6940dbe8a8a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let qrcodeInstance = null;
+
+    const dapatkanLinkMenuUtama = () => {
+      const hostingSekarang = window.location.origin;
+      if(hostingSekarang.includes('127.0.0.1') || hostingSekarang.includes('localhost')) {
+        return "https://warungmuchsin.vercel.app";
+      }
+      return hostingSekarang.replace('admin.html', '').replace(/\/$/, "");
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      qrcodeInstance = new QRCode(document.getElementById("qrcode"), {
+        text: dapatkanLinkMenuUtama(),
+        width: 200,
+        height: 200,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+      });
+    });
+
+    window.pindahTab = (tabName) => {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-rose-950', 'shadow-sm');
+        btn.classList.add('text-white', 'hover:bg-white/10');
+      });
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tabBtn-${tabName}`);
+      activeBtn.classList.add('bg-white', 'text-rose-950', 'shadow-sm');
+    };
+
+    window.simpanMenuBaru = async (e) => {
+      e.preventDefault();
+      const nama = document.getElementById("menuNama").value.trim();
+      const kategori = document.getElementById("menuKategori").value;
+      const harga = parseFloat(document.getElementById("menuHarga").value);
+      const hargaPromoInput = document.getElementById("menuHargaPromo").value;
+      const hargaPromo = hargaPromoInput ? parseFloat(hargaPromoInput) : null;
+      const fileFoto = document.getElementById("menuFoto").files[0];
+      let base64Foto = "";
+      if(fileFoto) { base64Foto = await prosesUbahKeBase64(fileFoto); }
+
+      try {
+        await addDoc(collection(db, "menu"), {
+          nama, kategori, harga, hargaPromo, foto: base64Foto, tersedia: true
+        });
+        document.getElementById("formMenu").reset();
+        alert("Mantap, menu baru berhasil masuk database! 🔥");
+      } catch (err) { alert("Gagal simpan menu: " + err.message); }
+    };
+
+    function prosesUbahKeBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    // FITUR UPDATE: SAKLAR STOK (TOGGLE) NYAMBUNG KE FIREBASE
+    window.toggleStokMenu = async (id, currentStatus) => {
+      try {
+        await updateDoc(doc(db, "menu", id), { tersedia: !currentStatus });
+      } catch (err) { alert("Gagal ganti status stok: " + err.message); }
+    };
+
+    onSnapshot(query(collection(db, "menu"), orderBy("nama", "asc")), (snap) => {
+      const container = document.getElementById("listAdminMenu");
+      container.innerHTML = "";
+      snap.docs.forEach(d => {
+        const m = d.data();
+        const hAsli = new Intl.NumberFormat("id-ID").format(m.harga);
+        const hPromo = m.hargaPromo ? new Intl.NumberFormat("id-ID").format(m.hargaPromo) : null;
+        const statusStok = m.tersedia !== false;
+        
+        container.innerHTML += `
+          <div class="flex items-center justify-between p-3 bg-white border rounded-2xl text-xs shadow-sm">
+            <div class="flex items-center gap-3 truncate ${!statusStok ? 'opacity-40 grayscale' : ''}">
+              <img src="${m.foto || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" class="w-10 h-10 object-cover rounded-xl bg-neutral-200">
+              <div class="truncate">
+                <p class="font-bold text-neutral-800 capitalize">${m.nama}</p>
+                <p class="text-[10px] text-rose-800 font-bold">${hPromo ? `Rp ${hPromo}` : `Rp ${hAsli}`}</p>
+              </div>
+            </div>
+            <div class="flex gap-1">
+              <button onclick="toggleStokMenu('${d.id}', ${statusStok})" class="px-2.5 py-1.5 rounded-xl font-bold transition ${statusStok ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-neutral-100 text-neutral-500'}">
+                ${statusStok ? '✅ Tersedia' : '🚫 Habis'}
+              </button>
+              <button onclick="hapusMenuID('${d.id}')" class="px-2.5 py-1.5 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition">Hapus</button>
+            </div>
+          </div>`;
+      });
+    });
+
+    window.hapusMenuID = async (id) => {
+      if(confirm("Beneran mau hapus menu ini, Coy?")) { await deleteDoc(doc(db, "menu", id)); }
+    };
+
+    window.downloadQRCode = () => {
+      const qrImg = document.querySelector("#qrcode img");
+      if(!qrImg) { alert("Sabar Coy, QR belum siap!"); return; }
+      const link = document.createElement("a");
+      link.href = qrImg.src;
+      link.download = "QR_Menu_Warung_Muchsin.png";
+      link.click();
+    };
+  </script>
+</body>
+</html>
