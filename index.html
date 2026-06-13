@@ -43,7 +43,7 @@
       </div>
   </div>
 
-  <div id="flyingCart" class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white p-5 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.12)] border-t border-neutral-100 z-50 transform translate-y-full transition-transform duration-300">
+  <div id="flyingCart" class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white p-5 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.12)] border-t border-neutral-100 z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto">
     
     <div id="cartStage1" class="flex justify-between items-center">
       <div>
@@ -55,9 +55,13 @@
 
     <div id="cartStage2" class="hidden space-y-4">
       <div class="flex justify-between items-center border-b pb-2">
-        <h3 class="text-xs font-black text-neutral-800 uppercase tracking-wider">📍 Info Alamat Pengiriman</h3>
+        <h3 class="text-xs font-black text-neutral-800 uppercase tracking-wider">📋 Validasi & Alamat Kirim</h3>
         <button onclick="kembaliKeTahapSatu()" class="text-[10px] font-bold text-rose-800">⬅️ Kembali</button>
       </div>
+
+      <div id="wrapperRingkasanNota" class="space-y-3 bg-neutral-50 p-3 rounded-2xl border text-xs max-h-[250px] overflow-y-auto">
+        </div>
+
       <div class="space-y-2.5">
         <input type="text" id="pembeliNama" placeholder="Nama Lengkap Anda" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
         <textarea id="pembeliAlamat" placeholder="Alamat Rumah Lengkap / Patokan Lokasi" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950" rows="2"></textarea>
@@ -84,6 +88,8 @@
 
     let semuaMenuData = [];
     let kategoriAktif = "semua";
+    
+    // Struktur Baru: keranjangBelanja = { id_menu: { qty: 2, pedas: "Level 3", catatan: "" } }
     let keranjangBelanja = {};
     
     let jamBukaDb = 10;
@@ -190,7 +196,7 @@
       }
 
       filtered.forEach(m => {
-        const qty = keranjangBelanja[m.id] || 0;
+        const qty = keranjangBelanja[m.id] ? keranjangBelanja[m.id].qty : 0;
         const hargaTampil = m.hargaPromo ? m.hargaPromo : m.harga;
         const formatHarga = new Intl.NumberFormat("id-ID").format(hargaTampil);
         const formatHargaNormal = m.hargaPromo ? new Intl.NumberFormat("id-ID").format(m.harga) : null;
@@ -218,11 +224,22 @@
     };
 
     window.ubahJumlahBelanja = (id, delta) => {
-      const current = keranjangBelanja[id] || 0;
-      const hasil = current + delta;
-      if (hasil <= 0) { delete keranjangBelanja[id]; } 
-      else { keranjangBelanja[id] = hasil; }
+      const currentQty = keranjangBelanja[id] ? keranjangBelanja[id].qty : 0;
+      const hasilQty = currentQty + delta;
+      
+      if (hasilQty <= 0) { 
+        delete keranjangBelanja[id]; 
+      } else { 
+        if (!keranjangBelanja[id]) {
+          keranjangBelanja[id] = { qty: hasilQty, pedas: "Level 0 (Tidak Pedas)", catatan: "" };
+        } else {
+          keranjangBelanja[id].qty = hasilQty;
+        }
+      }
       filterDanTampilkanMenu();
+      if (!document.getElementById("cartStage2").classList.contains("hidden")) {
+        susunTampilanNotaTahapDua();
+      }
     };
 
     function hitungRingkasanBelanja() {
@@ -232,8 +249,8 @@
       semuaMenuData.forEach(m => {
         if(keranjangBelanja[m.id]) {
           const hargaFinal = m.hargaPromo ? m.hargaPromo : m.harga;
-          total += (hargaFinal * keranjangBelanja[m.id]);
-          totalItem += keranjangBelanja[m.id];
+          total += (hargaFinal * keranjangBelanja[m.id].qty);
+          totalItem += keranjangBelanja[m.id].qty;
         }
       });
 
@@ -246,11 +263,79 @@
         cekStatusWarungRealtime();
       } else {
         flying.classList.add("translate-y-full");
+        kembaliKeTahapSatu();
       }
     }
 
+    // FUNGSI UNTUK MERENDER RINGKASAN NOTA + INPUT OPSIONAL LEVEL PEDAS & CATATAN PER ITEM
+    function susunTampilanNotaTahapDua() {
+      const wrapper = document.getElementById("wrapperRingkasanNota");
+      wrapper.innerHTML = `<h4 class="font-extrabold text-neutral-700 border-b pb-1 mb-2 uppercase text-[10px] tracking-wider">Detail Item & Catatan Rasa</h4>`;
+      
+      let adaItem = false;
+      let grandTotal = 0;
+
+      semuaMenuData.forEach(m => {
+        if (keranjangBelanja[m.id]) {
+          adaItem = true;
+          const itemCart = keranjangBelanja[m.id];
+          const hargaFinal = m.hargaPromo ? m.hargaPromo : m.harga;
+          const subTotal = hargaFinal * itemCart.qty;
+          grandTotal += subTotal;
+
+          // Cek apakah item adalah makanan untuk menampilkan opsi level pedas
+          const IsMakanan = m.kategori === "makanan" || m.nama.toLowerCase().includes("seblak") || m.nama.toLowerCase().includes("mie");
+
+          wrapper.innerHTML += `
+            <div class="bg-white p-3 rounded-xl border border-neutral-100 shadow-sm space-y-2">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="font-bold text-neutral-800">${m.nama}</span>
+                  <span class="text-[10px] text-neutral-400 font-medium ml-1">(${itemCart.qty}x)</span>
+                </div>
+                <span class="font-bold text-rose-950">Rp ${new Intl.NumberFormat("id-ID").format(subTotal)}</span>
+              </div>
+              
+              ${IsMakanan ? `
+              <div class="grid grid-cols-3 gap-2 items-center pt-1 border-t border-dashed border-neutral-100">
+                <label class="text-[10px] font-bold text-neutral-500 uppercase">Pedas:</label>
+                <select onchange="updateOpsiItem('${m.id}', 'pedas', this.value)" class="col-span-2 p-1 bg-neutral-50 border rounded-md text-[11px] outline-none font-semibold text-neutral-700">
+                  <option value="Level 0 (Tidak Pedas)" ${itemCart.pedas === "Level 0 (Tidak Pedas)" ? "selected" : ""}>🌶️ Level 0 (Original)</option>
+                  <option value="Level 1 (Sangat Ringan)" ${itemCart.pedas === "Level 1 (Sangat Ringan)" ? "selected" : ""}>🌶️ Level 1</option>
+                  <option value="Level 2 (Sedang)" ${itemCart.pedas === "Level 2 (Sedang)" ? "selected" : ""}>🌶️ Level 2 (Sedang)</option>
+                  <option value="Level 3 (Pedas Mantap)" ${itemCart.pedas === "Level 3 (Pedas Mantap)" ? "selected" : ""}>🌶️ Level 3 (Mantap)</option>
+                  <option value="Level 4 (Gila)" ${itemCart.pedas === "Level 4 (Gila)" ? "selected" : ""}>🌶️ Level 4 (Gila)</option>
+                  <option value="Level 5 (⚠️ Ambyar)" ${itemCart.pedas === "Level 5 (⚠️ Ambyar)" ? "selected" : ""}>🌶️ Level 5 (⚠️ Ambyar)</option>
+                </select>
+              </div>
+              ` : ''}
+
+              <div class="grid grid-cols-3 gap-2 items-center">
+                <label class="text-[10px] font-bold text-neutral-500 uppercase">Catatan:</label>
+                <input type="text" value="${itemCart.catatan || ''}" oninput="updateOpsiItem('${m.id}', 'catatan', this.value)" placeholder="Contoh: Pisah kuah / tanpa sayur" class="col-span-2 p-1 bg-neutral-50 border rounded-md text-[11px] outline-none font-medium placeholder-neutral-300">
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      wrapper.innerHTML += `
+        <div class="flex justify-between items-center border-t pt-2 mt-2 font-black text-rose-950 text-xs">
+          <span>TOTAL NOTA:</span>
+          <span>Rp ${new Intl.NumberFormat("id-ID").format(grandTotal)}</span>
+        </div>
+      `;
+    }
+
+    window.updateOpsiItem = (id, properti, nilai) => {
+      if (keranjangBelanja[id]) {
+        keranjangBelanja[id][properti] = nilai;
+      }
+    };
+
     window.bukaTahapDua = () => {
       if(!cekStatusWarungRealtime()) return;
+      susunTampilanNotaTahapDua();
       document.getElementById("cartStage1").classList.add("hidden");
       document.getElementById("cartStage2").classList.remove("hidden");
     };
@@ -279,21 +364,30 @@
       teksPesanan += `👤 *Nama Pembeli:* ${nama}\n`;
       teksPesanan += `📍 *Alamat Kirim:* ${alamat}\n`;
       teksPesanan += `----------------------------------------\n\n`;
-      teksPesanan += `📦 *DAFTAR PESANAN:*\n`;
+      teksPesanan += `📦 *DAFTAR PESANAN VALIDIATED:*\n`;
 
       let grandTotal = 0;
       semuaMenuData.forEach(m => {
         if(keranjangBelanja[m.id]) {
+          const itemCart = keranjangBelanja[m.id];
           const hargaFinal = m.hargaPromo ? m.hargaPromo : m.harga;
-          const subTotal = hargaFinal * keranjangBelanja[m.id];
+          const subTotal = hargaFinal * itemCart.qty;
           grandTotal += subTotal;
-          teksPesanan += `- ${m.nama} (${keranjangBelanja[m.id]}x) = Rp ${new Intl.NumberFormat("id-ID").format(subTotal)}\n`;
+          
+          teksPesanan += `- *${m.nama}* (${itemCart.qty}x) = Rp ${new Intl.NumberFormat("id-ID").format(subTotal)}\n`;
+          if(m.kategori === "makanan" || m.nama.toLowerCase().includes("seblak") || m.nama.toLowerCase().includes("mie")) {
+            teksPesanan += `  🔥 _Pedas: ${itemCart.pedas}_\n`;
+          }
+          if(itemCart.catatan && itemCart.catatan.trim() !== "") {
+            teksPesanan += `  📝 _Notes: "${itemCart.catatan.trim()}"_\n`;
+          }
+          teksPesanan += `\n`;
         }
       });
 
-      teksPesanan += `\n💰 *TOTAL PEMBAYARAN:* *Rp ${new Intl.NumberFormat("id-ID").format(grandTotal)}*\n`;
+      teksPesanan += `💰 *TOTAL PEMBAYARAN:* *Rp ${new Intl.NumberFormat("id-ID").format(grandTotal)}*\n`;
       teksPesanan += `----------------------------------------\n`;
-      teksPesanan += `_Mohon segera diproses ya, terima kasih!_`;
+      teksPesanan += `_Mohon segera dikonfirmasi dan diproses ya, terima kasih!_`;
 
       const nomorWA = "628567770135"; 
       const urlWA = `https://api.whatsapp.com/send?phone=${nomorWA}&text=${encodeURIComponent(teksPesanan)}`;
