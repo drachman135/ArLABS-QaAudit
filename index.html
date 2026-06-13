@@ -15,13 +15,13 @@
 </head>
 <body class="pb-32">
 
-  <div class="bg-rose-950 text-white pt-8 pb-10 px-4 rounded-b-[2.5rem] shadow-lg text-center relative overflow-hidden w-full">
+  <div id="plangStatusToko" class="fixed top-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase shadow-md transition-all duration-300 bg-neutral-600 text-white z-50 border border-white/20">
+    <span class="w-2 h-2 rounded-full animate-pulse bg-white"></span>
+    <span id="txtPlangStatus">MEMUAT STATUS...</span>
+  </div>
+
+  <div class="bg-rose-950 text-white pt-12 pb-10 px-4 rounded-b-[2.5rem] shadow-lg text-center relative overflow-hidden w-full">
     <div class="max-w-6xl mx-auto relative z-10 flex flex-col items-center">
-      <div id="plangStatusToko" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-sm transition-all duration-300 bg-neutral-600 text-white">
-        <span class="w-2 h-2 rounded-full animate-pulse bg-white"></span>
-        <span id="txtPlangStatus">MEMUAT STATUS...</span>
-      </div>
-      
       <h1 class="text-3xl font-black text-amber-400 mt-3 tracking-tight">WARUNG MUCHSIN ASSEGAF</h1>
       <p id="txtInfoOperasional" class="text-xs text-rose-200 mt-1 font-medium">Memuat info jam operasional...</p>
     </div>
@@ -95,7 +95,6 @@
       if(localStorage.getItem("muchsin_alamat")) document.getElementById("pembeliAlamat").value = localStorage.getItem("muchsin_alamat");
     });
 
-    // MENDENGARKAN STATUS JAM OPERASIONAL LIVE DARI FIREBASE (DENGAN PROTEKSI CADANGAN)
     onSnapshot(doc(db, "pengaturan", "operasional"), (docSnap) => {
       if(docSnap.exists()) {
         const data = docSnap.data();
@@ -132,7 +131,7 @@
       const isBenarTutup = statusTutupDarurat || !diDalamJamKerja;
 
       if (isBenarTutup) {
-        plang.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-sm transition-all duration-300 bg-red-600 text-white border border-red-500 animate-pulse";
+        plang.className = "fixed top-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase shadow-md transition-all duration-300 bg-red-600 text-white border border-red-500 animate-pulse z-50";
         txtPlang.innerText = statusTutupDarurat ? "🚨 TUTUP DARURAT" : "🚫 WARUNG TUTUP";
 
         btnStage1.disabled = true;
@@ -145,7 +144,7 @@
         
         return false;
       } else {
-        plang.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-sm transition-all duration-300 bg-emerald-500 text-rose-950 border border-emerald-400";
+        plang.className = "fixed top-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase shadow-md transition-all duration-300 bg-emerald-500 text-rose-950 border border-emerald-400 z-50";
         txtPlang.innerText = "🟢 WARUNG BUKA";
 
         btnStage1.disabled = false;
