@@ -17,7 +17,7 @@
   <div class="bg-rose-950 text-white p-6 rounded-3xl shadow-md flex flex-col sm:flex-row justify-between items-center gap-4">
     <div class="text-center sm:text-left">
       <h1 id="txtHeaderRestoran" class="text-2xl font-black text-amber-400 tracking-tight">KONTROL ENGINE OPERASIONAL</h1>
-      <p class="text-xs text-rose-200 mt-0.5">Manajemen Profil, Menu, & Status Jam Kerja Live</p>
+      <p class="text-xs text-rose-200 mt-0.5">Manajemen Profil, Menu, Multi Pop-Up & Status Jam Kerja Live</p>
     </div>
     <a href="index.html" target="_blank" class="bg-amber-400 text-rose-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider hover:bg-amber-300 transition">🌐 Buka Menu Pembeli</a>
   </div>
@@ -52,20 +52,21 @@
           <div class="pt-2 border-t border-neutral-200 space-y-1">
             <div class="flex justify-between items-center">
               <label class="text-[10px] font-bold text-orange-600 uppercase">📢 Teks Berjalan Customer</label>
-              <button onclick="hapusElemenPengumuman('tickerText')" class="text-[9px] font-black text-red-600 hover:underline">Hapus Teks Berjalan 🗑️</button>
+              <button onclick="hapusTickerTextOnly()" class="text-[9px] font-black text-red-600 hover:underline">Hapus Teks Berjalan 🗑️</button>
             </div>
             <input type="text" id="profilTickerText" placeholder="Tulis pengumuman berjalan baru..." class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
           </div>
 
-          <div class="space-y-1">
+          <div class="space-y-1 pt-2 border-t border-neutral-200">
             <div class="flex justify-between items-center">
-              <label class="text-[10px] font-bold text-red-600 uppercase">🚨 Pop-Up Tengah Halaman</label>
-              <button onclick="hapusElemenPengumuman('popupText')" class="text-[9px] font-black text-red-600 hover:underline">Hapus Pop-Up 🗑️</button>
+              <label class="text-[10px] font-bold text-red-600 uppercase">🚨 Siarkan Pop-Up Baru</label>
+              <button onclick="bersihkanSemuaRiwayatPopupFirestore()" class="text-[9px] font-black text-red-600 hover:underline">Hapus Semua Pop-Up 🗑️</button>
             </div>
-            <textarea id="profilPopupText" rows="2" placeholder="Tulis teks pengumuman tengah layar baru..." class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950"></textarea>
+            <textarea id="profilPopupText" rows="2" placeholder="Tulis teks pop-up baru yang akan menumpuk di layar pelanggan..." class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950"></textarea>
+            <button onclick="kirimPopupMenumpukBaru()" class="w-full bg-red-600 text-white text-[10px] font-black py-1.5 rounded-lg uppercase tracking-wide hover:bg-red-700 transition">Kirim & Tumpuk Pop-Up 🚀</button>
           </div>
 
-          <button onclick="simpanProfilRestoran()" class="w-full bg-neutral-900 text-white text-xs font-black py-2 rounded-xl uppercase tracking-wider hover:bg-neutral-800 transition">Simpan Perubahan 💾</button>
+          <button onclick="simpanProfilRestoran()" class="w-full bg-neutral-900 text-white text-xs font-black py-2 rounded-xl uppercase tracking-wider hover:bg-neutral-800 transition">Simpan Perubahan Data 💾</button>
         </div>
       </div>
 
@@ -170,7 +171,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy, doc, setDoc, addDoc, deleteDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, doc, setDoc, addDoc, deleteDoc, updateDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBlZTatONukCKARuviwEUCiDUMuT03nz3U",
@@ -211,7 +212,6 @@
         if(data.whatsapp) document.getElementById("profilWA").placeholder = data.whatsapp;
         if(data.alamat) document.getElementById("profilAlamat").placeholder = data.alamat;
         document.getElementById("profilTickerText").placeholder = data.tickerText || "Belum ada teks berjalan aktif.";
-        document.getElementById("profilPopupText").placeholder = data.popupText || "Belum ada pengumuman pop-up aktif.";
       }
     });
 
@@ -238,14 +238,12 @@
       const whatsappInput = document.getElementById("profilWA").value.trim();
       const alamatInput = document.getElementById("profilAlamat").value.trim();
       const tickerInput = document.getElementById("profilTickerText").value.trim();
-      const popupInput = document.getElementById("profilPopupText").value.trim();
 
       const dataUpdate = {};
       if (namaInput !== "") dataUpdate.nama = namaInput;
       if (whatsappInput !== "") dataUpdate.whatsapp = whatsappInput;
       if (alamatInput !== "") dataUpdate.alamat = alamatInput;
       if (tickerInput !== "") dataUpdate.tickerText = tickerInput;
-      if (popupInput !== "") dataUpdate.popupText = popupInput;
 
       if (Object.keys(dataUpdate).length === 0) {
         alert("Silakan isi minimal salah satu kolom untuk melakukan perubahan data.");
@@ -254,30 +252,53 @@
 
       try {
         const docRef = doc(db, "pengaturan", "profil");
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
-          await setDoc(docRef, dataUpdate);
-        } else {
-          await updateDoc(docRef, dataUpdate);
-        }
+        await setDoc(docRef, dataUpdate, { merge: true });
         alert("Perubahan data berhasil disimpan secara live!");
         document.getElementById("profilNama").value = "";
         document.getElementById("profilWA").value = "";
         document.getElementById("profilAlamat").value = "";
         document.getElementById("profilTickerText").value = "";
-        document.getElementById("profilPopupText").value = "";
       } catch (err) { alert("Gagal update profil: " + err.message); }
     };
 
-    window.hapusElemenPengumuman = async (fieldNama) => {
-      if (confirm(`Apakah Anda yakin ingin menonaktifkan dan menghapus data ${fieldNama === 'tickerText' ? 'Teks Berjalan' : 'Pop-Up'} ini?`)) {
+    // FUNGSI UNTUK MENGIRIM POP-UP BARU SECARA MENUMPUK (MENGGUNAKAN SUB-COLLECTION DATA TIMESTAMP)
+    window.kirimPopupMenumpukBaru = async () => {
+      const teksPopupInput = document.getElementById("profilPopupText").value.trim();
+      if(teksPopupInput === "") { alert("Tulis isi teks pengumuman terlebih dahulu!"); return; }
+
+      try {
+        const subCollectionRef = collection(db, "pengaturan", "profil", "popups");
+        await addDoc(subCollectionRef, {
+          teks: teksPopupInput,
+          waktu: Date.now() // Penanda urutan masuk untuk mendeteksi data teranyar
+        });
+        alert("Pop-up baru sukses disiarkan dan menumpuk di layar pelanggan!");
+        document.getElementById("profilPopupText").value = "";
+      } catch (err) {
+        alert("Gagal mempublikasikan pop-up: " + err.message);
+      }
+    };
+
+    window.hapusTickerTextOnly = async () => {
+      if (confirm("Apakah Anda yakin ingin menghapus Teks Berjalan?")) {
         try {
-          const docRef = doc(db, "pengaturan", "profil");
-          const updateObject = {};
-          updateObject[fieldNama] = "";
-          await updateDoc(docRef, updateObject);
-          alert(`Sukses! ${fieldNama === 'tickerText' ? 'Teks Berjalan' : 'Pop-Up'} telah dinonaktifkan.`);
-        } catch (err) { alert("Gagal menghapus elemen pengumuman: " + err.message); }
+          await updateDoc(doc(db, "pengaturan", "profil"), { tickerText: "" });
+          alert("Teks Berjalan berhasil dinonaktifkan.");
+        } catch (err) { alert("Gagal menghapus: " + err.message); }
+      }
+    };
+
+    // FUNGSI BERSIHKAN POP-UP: Menghapus semua riwayat pop-up menumpuk di server Firestore
+    window.bersihkanSemuaRiwayatPopupFirestore = async () => {
+      if (confirm("Apakah Anda yakin ingin membersihkan dan menutup semua pop-up yang sedang menumpuk di layar pelanggan?")) {
+        try {
+          const querySnapshot = await getDocs(collection(db, "pengaturan", "profil", "popups"));
+          const deletePromises = querySnapshot.docs.map(documentDoc => deleteDoc(doc(db, "pengaturan", "profil", "popups", documentDoc.id)));
+          await Promise.all(deletePromises);
+          alert("Semua riwayat tumpukan pop-up di server sukses dibersihkan!");
+        } catch (err) {
+          alert("Gagal mengosongkan tumpukan pop-up: " + err.message);
+        }
       }
     };
 
@@ -348,7 +369,6 @@
       } catch (err) { alert("Gagal menambahkan menu: " + err); }
     };
 
-    // PERBAIKAN FIXED: Data Firebase dimuat utuh sebelum memicu fungsi visual filter rendering
     onSnapshot(query(collection(db, "menu"), orderBy("nama", "asc")), (snap) => {
       semuaMenuAdminData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       renderTabelAdminLive();
@@ -366,7 +386,6 @@
     function renderTabelAdminLive() {
       const tbody = document.getElementById("tbodyMenuLive");
       tbody.innerHTML = "";
-      
       const filteredData = semuaMenuAdminData.filter(m => filterTabelAktif === "semua" || m.kategori === filterTabelAktif);
 
       if(filteredData.length === 0) {
@@ -391,7 +410,7 @@
             </td>
             <td class="py-3 px-2 text-center">
               <div class="flex justify-center gap-1.5" id="cellAksi-${m.id}">
-                <button onclick="aktifkanQuickEdit ('${m.id}', '${m.nama}', ${m.harga}, ${m.hargaPromo || 0})" class="bg-white text-neutral-700 font-bold px-2 py-1 rounded-lg border text-[10px] hover:bg-neutral-50 transition">Edit ✏️</button>
+                <button onclick="aktifkanQuickEdit('${m.id}', '${m.nama}', ${m.harga}, ${m.hargaPromo || 0})" class="bg-white text-neutral-700 font-bold px-2 py-1 rounded-lg border text-[10px] hover:bg-neutral-50 transition">Edit ✏️</button>
                 <button onclick="hapusMenuDokumen('${m.id}')" class="bg-rose-50 text-rose-700 font-bold px-2 py-1 rounded-lg text-[10px] border border-rose-200/50 hover:bg-rose-100 transition">Hapus</button>
               </div>
             </td>
