@@ -25,21 +25,30 @@
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <div class="space-y-6">
       
-      <div class="bg-white p-5 rounded-3xl shadow-sm border border-neutral-200/60 space-y-3">
-        <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest border-b pb-2">🏢 Profil Ruko/Restoran</h2>
-        <div>
-          <label class="text-[10px] font-bold text-neutral-400 uppercase">Nama Restoran</label>
-          <input type="text" id="profilNama" class="w-full p-2 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+      <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 overflow-hidden">
+        <button onclick="toggleDropdownProfil()" class="w-full p-5 flex justify-between items-center bg-white hover:bg-neutral-50/80 transition text-left outline-none">
+          <div>
+            <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">🏢 Profil Ruko/Restoran</h2>
+            <p class="text-[10px] text-neutral-400 mt-0.5">Klik untuk mengubah Nama, WA, & Alamat</p>
+          </div>
+          <span id="ikonPanahProfil" class="text-xs font-bold text-neutral-400 transition-transform duration-300">▼</span>
+        </button>
+
+        <div id="kontenDropdownProfil" class="hidden p-5 border-t border-neutral-100 bg-neutral-50/50 space-y-3">
+          <div>
+            <label class="text-[10px] font-bold text-neutral-400 uppercase">Nama Restoran <span class="text-[9px] text-neutral-400 font-normal">(Opsional)</span></label>
+            <input type="text" id="profilNama" placeholder="Masukkan nama baru jika ingin diubah" class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-neutral-400 uppercase">Nomor WhatsApp Toko <span class="text-[9px] text-neutral-400 font-normal">(Opsional)</span></label>
+            <input type="text" id="profilWA" placeholder="Contoh: 6281234567890" class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-neutral-400 uppercase">Alamat Operasional <span class="text-[9px] text-neutral-400 font-normal">(Opsional)</span></label>
+            <textarea id="profilAlamat" rows="2" placeholder="Masukkan alamat baru jika ingin diubah" class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950"></textarea>
+          </div>
+          <button onclick="simpanProfilRestoran()" class="w-full bg-neutral-900 text-white text-xs font-black py-2 rounded-xl uppercase tracking-wider hover:bg-neutral-800 transition">Simpan Perubahan 💾</button>
         </div>
-        <div>
-          <label class="text-[10px] font-bold text-neutral-400 uppercase">Nomor WhatsApp Toko</label>
-          <input type="text" id="profilWA" placeholder="Contoh: 628567770135" class="w-full p-2 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
-        </div>
-        <div>
-          <label class="text-[10px] font-bold text-neutral-400 uppercase">Alamat Operasional</label>
-          <textarea id="profilAlamat" rows="2" class="w-full p-2 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950"></textarea>
-        </div>
-        <button onclick="simpanProfilRestoran()" class="w-full bg-neutral-900 text-white text-xs font-black py-2 rounded-xl uppercase tracking-wider hover:bg-neutral-800 transition">Update Data Profil 💾</button>
       </div>
 
       <div class="bg-white p-5 rounded-3xl shadow-sm border border-neutral-200/60 space-y-4">
@@ -117,7 +126,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy, doc, setDoc, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, doc, setDoc, addDoc, deleteDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBlZTatONukCKARuviwEUCiDUMuT03nz3U",
@@ -134,14 +143,29 @@
     let currentTutupDarurat = false;
     let base64GambarResized = "";
 
-    // MENDENGARKAN DATA PROFIL RESTORAN LIVE
+    // FUNGSI ANIMASI KONTROL DROPDOWN FORM PROFIL
+    window.toggleDropdownProfil = () => {
+      const konten = document.getElementById("kontenDropdownProfil");
+      const ikon = document.getElementById("ikonPanahProfil");
+      if (konten.classList.contains("hidden")) {
+        konten.classList.remove("hidden");
+        ikon.innerText = "▲";
+      } else {
+        konten.classList.add("hidden");
+        ikon.innerText = "▼";
+      }
+    };
+
+    // MENDENGARKAN DATA PROFIL RESTORAN LIVE (Hanya mengisi placeholder/nilai awal jika ada data)
     onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        document.getElementById("profilNama").value = data.nama || "";
-        document.getElementById("profilWA").value = data.whatsapp || "";
-        document.getElementById("profilAlamat").value = data.alamat || "";
-        document.getElementById("txtHeaderRestoran").innerText = `PANEL KENDALI: ${data.nama ? data.nama.toUpperCase() : 'RESTORAN'}`;
+        if(data.nama) {
+          document.getElementById("profilNama").placeholder = data.nama;
+          document.getElementById("txtHeaderRestoran").innerText = `PANEL KENDALI: ${data.nama.toUpperCase()}`;
+        }
+        if(data.whatsapp) document.getElementById("profilWA").placeholder = data.whatsapp;
+        if(data.alamat) document.getElementById("profilAlamat").placeholder = data.alamat;
       }
     });
 
@@ -164,17 +188,43 @@
       }
     });
 
+    // LOGIKA UPDATE PILIHAN OPSIONAL (Hanya memperbarui kolom yang diisi oleh admin)
     window.simpanProfilRestoran = async () => {
-      const nama = document.getElementById("profilNama").value.trim();
-      const whatsapp = document.getElementById("profilWA").value.trim();
-      const alamat = document.getElementById("profilAlamat").value.trim();
+      const namaInput = document.getElementById("profilNama").value.trim();
+      const whatsappInput = document.getElementById("profilWA").value.trim();
+      const alamatInput = document.getElementById("profilAlamat").value.trim();
 
-      if (!nama || !whatsapp) { alert("Nama Restoran dan WhatsApp wajib diisi!"); return; }
+      const dataUpdate = {};
+      if (namaInput !== "") dataUpdate.nama = namaInput;
+      if (whatsappInput !== "") dataUpdate.whatsapp = whatsappInput;
+      if (alamatInput !== "") dataUpdate.alamat = alamatInput;
+
+      // Jika admin mengklik simpan tanpa mengisi satu kolom pun
+      if (Object.keys(dataUpdate).length === 0) {
+        alert("Silakan isi minimal salah satu kolom untuk melakukan perubahan data.");
+        return;
+      }
 
       try {
-        await setDoc(doc(db, "pengaturan", "profil"), { nama, whatsapp, alamat }, { merge: true });
-        alert("Data profil ruko berhasil di-update secara live!");
-      } catch (err) { alert("Gagal menyimpan profil: " + err); }
+        const docRef = doc(db, "pengaturan", "profil");
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+          // Jika dokumen belum terbentuk pertama kali di database, gunakan setDoc
+          await setDoc(docRef, dataUpdate);
+        } else {
+          // Jika dokumen sudah ada, lakukan updateDoc secara parsial (opsional)
+          await updateDoc(docRef, dataUpdate);
+        }
+
+        alert("Perubahan parsial profil berhasil disimpan secara live!");
+        // Bersihkan nilai input text setelah berhasil agar placeholder baru muncul
+        document.getElementById("profilNama").value = "";
+        document.getElementById("profilWA").value = "";
+        document.getElementById("profilAlamat").value = "";
+      } catch (err) { 
+        alert("Gagal melakukan pembaruan profil: " + err.message); 
+      }
     };
 
     window.simpanJamOperasional = async () => {
