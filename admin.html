@@ -22,14 +22,15 @@
     <a href="index.html" target="_blank" class="bg-amber-400 text-rose-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider hover:bg-amber-300 transition">🌐 Buka Menu Pembeli</a>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="space-y-6">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+    
+    <div class="space-y-6 md:col-span-1">
       
       <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 overflow-hidden">
-        <button onclick="toggleDropdownProfil()" class="w-full p-5 flex justify-between items-center bg-white hover:bg-neutral-50/80 transition text-left outline-none">
+        <button onclick="toggleDropdown('Profil')" class="w-full p-5 flex justify-between items-center bg-white hover:bg-neutral-50/80 transition text-left outline-none">
           <div>
             <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">🏢 Profil Ruko/Restoran</h2>
-            <p class="text-[10px] text-neutral-400 mt-0.5">Klik untuk mengubah Nama, WA, & Alamat</p>
+            <p class="text-[10px] text-neutral-400 mt-0.5">Klik untuk merubah Nama, WA, & Alamat</p>
           </div>
           <span id="ikonPanahProfil" class="text-xs font-bold text-neutral-400 transition-transform duration-300">▼</span>
         </button>
@@ -51,58 +52,78 @@
         </div>
       </div>
 
-      <div class="bg-white p-5 rounded-3xl shadow-sm border border-neutral-200/60 space-y-4">
-        <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest border-b pb-2">⏰ Jam Operasional Live</h2>
-        <div class="grid grid-cols-2 gap-3">
+      <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 overflow-hidden">
+        <button onclick="toggleDropdown('Jam')" class="w-full p-5 flex justify-between items-center bg-white hover:bg-neutral-50/80 transition text-left outline-none">
           <div>
-            <label class="text-[10px] font-bold text-neutral-400 uppercase">Jam Buka (WIB)</label>
-            <input type="number" id="inputJamBuka" min="0" max="23" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-bold outline-none focus:border-rose-950">
+            <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">⏰ Jam Operasional Live</h2>
+            <p class="text-[10px] text-neutral-400 mt-0.5">Klik untuk atur jam otomatis / saklar darurat</p>
           </div>
-          <div>
-            <label class="text-[10px] font-bold text-neutral-400 uppercase">Jam Tutup (WIB)</label>
-            <input type="number" id="inputJamTutup" min="0" max="23" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-bold outline-none focus:border-rose-950">
+          <span id="ikonPanahJam" class="text-xs font-bold text-neutral-400 transition-transform duration-300">▼</span>
+        </button>
+
+        <div id="kontenDropdownJam" class="hidden p-5 border-t border-neutral-100 bg-neutral-50/50 space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-[10px] font-bold text-neutral-400 uppercase">Jam Buka (WIB)</label>
+              <input type="number" id="inputJamBuka" min="0" max="23" class="w-full p-2.5 bg-white border rounded-xl text-xs font-bold outline-none focus:border-rose-950">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-neutral-400 uppercase">Jam Tutup (WIB)</label>
+              <input type="number" id="inputJamTutup" min="0" max="23" class="w-full p-2.5 bg-white border rounded-xl text-xs font-bold outline-none focus:border-rose-950">
+            </div>
+          </div>
+          <button onclick="simpanJamOperasional()" class="w-full bg-rose-950 text-amber-400 text-xs font-black py-2.5 rounded-xl uppercase tracking-wider shadow-sm hover:bg-rose-900 transition">Simpan Jam 💾</button>
+          
+          <div class="pt-2 border-t border-neutral-200">
+            <label class="text-[10px] font-bold text-neutral-400 uppercase block mb-1">Status Darurat Toko</label>
+            <button id="btnTutupDarurat" onclick="toggleTutupDarurat()" class="w-full text-xs font-black py-3 rounded-xl uppercase tracking-wider shadow-sm transition"></button>
           </div>
         </div>
-        <button onclick="simpanJamOperasional()" class="w-full bg-rose-950 text-amber-400 text-xs font-black py-2.5 rounded-xl uppercase tracking-wider shadow-sm hover:bg-rose-900 transition">Simpan Jam 💾</button>
-        
-        <div class="pt-2 border-t">
-          <label class="text-[10px] font-bold text-neutral-400 uppercase block mb-1">Status Darurat Toko</label>
-          <button id="btnTutupDarurat" onclick="toggleTutupDarurat()" class="w-full text-xs font-black py-3 rounded-xl uppercase tracking-wider shadow-sm transition"></button>
+      </div>
+
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 md:col-span-2 overflow-hidden">
+      <button onclick="toggleDropdown('Menu')" class="w-full p-5 flex justify-between items-center bg-white hover:bg-neutral-50/80 transition text-left outline-none">
+        <div>
+          <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">🍲 Manajemen Tambah Menu Baru</h2>
+          <p class="text-[10px] text-neutral-400 mt-0.5">Klik untuk membuka form input data katalog kuliner</p>
         </div>
+        <span id="ikonPanahMenu" class="text-xs font-bold text-neutral-400 transition-transform duration-300">▼</span>
+      </button>
+
+      <div id="kontenDropdownMenu" class="hidden p-5 border-t border-neutral-100 bg-neutral-50/50 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-neutral-400 uppercase">Nama Menu</label>
+            <input type="text" id="menuNama" placeholder="Contoh: Seblak Tulangan Premium" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-neutral-400 uppercase">Kategori</label>
+            <select id="menuKategori" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+              <option value="makanan">🍲 Makanan</option>
+              <option value="minuman">🍹 Minuman</option>
+              <option value="cemilan">🍿 Cemilan</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-neutral-400 uppercase">Harga Normal (Rp)</label>
+            <input type="number" id="menuHarga" placeholder="15000" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-neutral-400 uppercase">Harga Promo (Rp) - Opsional</label>
+            <input type="number" id="menuHargaPromo" placeholder="Kosongkan jika tidak promo" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-[10px] font-bold text-neutral-400 uppercase block">Foto Menu</label>
+            <input type="file" id="menuFotoFile" accept="image/*" onchange="prosesDanKompresGambar(this)" class="w-full text-xs text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-rose-50 file:text-rose-950 hover:file:bg-rose-100 cursor-pointer mt-1">
+            <p id="statusKompresi" class="text-[10px] text-emerald-600 font-bold mt-1 hidden">✓ Gambar berhasil dikompres otomatis di bawah 150 KB!</p>
+          </div>
+        </div>
+        <button onclick="unggahMenuBaru()" class="w-full bg-emerald-600 text-white text-xs font-black py-3 rounded-xl uppercase tracking-wider shadow-md hover:bg-emerald-700 transition">Publish Menu Ke Firebase Live 🚀</button>
       </div>
     </div>
 
-    <div class="bg-white p-5 rounded-3xl shadow-sm border border-neutral-200/60 md:col-span-2 space-y-4">
-      <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest border-b pb-2">🍲 Tambah Menu Baru</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label class="text-[10px] font-bold text-neutral-400 uppercase">Nama Menu</label>
-          <input type="text" id="menuNama" placeholder="Contoh: Seblak Tulangan Premium" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
-        </div>
-        <div>
-          <label class="text-[10px] font-bold text-neutral-400 uppercase">Kategori</label>
-          <select id="menuKategori" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
-            <option value="makanan">🍲 Makanan</option>
-            <option value="minuman">🍹 Minuman</option>
-            <option value="cemilan">🍿 Cemilan</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-[10px] font-bold text-neutral-400 uppercase">Harga Normal (Rp)</label>
-          <input type="number" id="menuHarga" placeholder="15000" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
-        </div>
-        <div>
-          <label class="text-[10px] font-bold text-neutral-400 uppercase">Harga Promo (Rp) - Opsional</label>
-          <input type="number" id="menuHargaPromo" placeholder="Kosongkan jika tidak promo" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
-        </div>
-        <div class="sm:col-span-2">
-          <label class="text-[10px] font-bold text-neutral-400 uppercase block">Foto Menu</label>
-          <input type="file" id="menuFotoFile" accept="image/*" onchange="prosesDanKompresGambar(this)" class="w-full text-xs text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-rose-50 file:text-rose-950 hover:file:bg-rose-100 cursor-pointer mt-1">
-          <p id="statusKompresi" class="text-[10px] text-emerald-600 font-bold mt-1 hidden">✓ Gambar berhasil dikompres otomatis di bawah 150 KB!</p>
-        </div>
-      </div>
-      <button onclick="unggahMenuBaru()" class="w-full bg-emerald-600 text-white text-xs font-black py-3 rounded-xl uppercase tracking-wider shadow-md hover:bg-emerald-700 transition">Publish Menu Ke Firebase Live 🚀</button>
-    </div>
   </div>
 
   <div class="bg-white p-5 rounded-3xl shadow-sm border border-neutral-200/60 space-y-4">
@@ -143,10 +164,11 @@
     let currentTutupDarurat = false;
     let base64GambarResized = "";
 
-    // FUNGSI ANIMASI KONTROL DROPDOWN FORM PROFIL
-    window.toggleDropdownProfil = () => {
-      const konten = document.getElementById("kontenDropdownProfil");
-      const ikon = document.getElementById("ikonPanahProfil");
+    // MANAJER MULTI DROPDOWN KONDISIONAL
+    window.toggleDropdown = (namaPanel) => {
+      const konten = document.getElementById(`kontenDropdown${namaPanel}`);
+      const ikon = document.getElementById(`ikonPanah${namaPanel}`);
+      
       if (konten.classList.contains("hidden")) {
         konten.classList.remove("hidden");
         ikon.innerText = "▲";
@@ -156,7 +178,7 @@
       }
     };
 
-    // MENDENGARKAN DATA PROFIL RESTORAN LIVE (Hanya mengisi placeholder/nilai awal jika ada data)
+    // MENDENGARKAN DATA PROFIL RESTORAN LIVE
     onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -188,7 +210,6 @@
       }
     });
 
-    // LOGIKA UPDATE PILIHAN OPSIONAL (Hanya memperbarui kolom yang diisi oleh admin)
     window.simpanProfilRestoran = async () => {
       const namaInput = document.getElementById("profilNama").value.trim();
       const whatsappInput = document.getElementById("profilWA").value.trim();
@@ -199,7 +220,6 @@
       if (whatsappInput !== "") dataUpdate.whatsapp = whatsappInput;
       if (alamatInput !== "") dataUpdate.alamat = alamatInput;
 
-      // Jika admin mengklik simpan tanpa mengisi satu kolom pun
       if (Object.keys(dataUpdate).length === 0) {
         alert("Silakan isi minimal salah satu kolom untuk melakukan perubahan data.");
         return;
@@ -210,21 +230,16 @@
         const docSnap = await getDoc(docRef);
         
         if (!docSnap.exists()) {
-          // Jika dokumen belum terbentuk pertama kali di database, gunakan setDoc
           await setDoc(docRef, dataUpdate);
         } else {
-          // Jika dokumen sudah ada, lakukan updateDoc secara parsial (opsional)
           await updateDoc(docRef, dataUpdate);
         }
 
-        alert("Perubahan parsial profil berhasil disimpan secara live!");
-        // Bersihkan nilai input text setelah berhasil agar placeholder baru muncul
+        alert("Perubahan profil berhasil disimpan!");
         document.getElementById("profilNama").value = "";
         document.getElementById("profilWA").value = "";
         document.getElementById("profilAlamat").value = "";
-      } catch (err) { 
-        alert("Gagal melakukan pembaruan profil: " + err.message); 
-      }
+      } catch (err) { alert("Gagal update profil: " + err.message); }
     };
 
     window.simpanJamOperasional = async () => {
