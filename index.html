@@ -23,11 +23,16 @@
     <span id="txtPlangStatus">MEMUAT STATUS...</span>
   </div>
 
-  <button onclick="hubungiAdminLangsung()" class="fixed bottom-6 right-4 z-40 bg-emerald-600 text-white p-3.5 rounded-full shadow-2xl hover:bg-emerald-700 active:scale-95 transition-all duration-300 flex items-center justify-center border border-white/10" title="Tanya Admin / Hubungi Kami">
-    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.66.986 3.288 1.481 5.362 1.483 5.405 0 9.805-4.4 9.808-9.81.002-2.622-1.01-5.087-2.854-6.935C17.062 2.04 14.604 1.026 12 1.026c-5.411 0-9.815 4.403-9.818 9.813-.001 2.083.5 3.731 1.492 5.395L2.68 21.366l5.22-.128s-.13.064-.253-.084zm13.111-7.794c-.207-.104-1.226-.605-1.416-.673-.19-.068-.328-.104-.466.104-.138.207-.535.673-.656.812-.12.138-.241.155-.448.052-.207-.104-.875-.323-1.666-1.027-.615-.548-1.03-1.226-1.15-1.433-.12-.207-.013-.319.091-.422.094-.093.207-.242.311-.363.104-.121.138-.207.207-.346.069-.138.034-.259-.017-.363-.052-.104-.466-1.122-.638-1.54-.168-.405-.333-.349-.466-.349-.121 0-.259-.008-.397-.008-.138 0-.363.052-.553.242-.19.19-.725.708-.725 1.727 0 1.02 1.484 2.005 1.691 2.28.207.276 2.921 4.461 7.078 6.257 1.012.433 1.78.692 2.387.884 1.016.321 1.941.276 2.673.167.814-.121 2.47-.673 2.815-1.329.345-.656.345-1.217.242-1.329-.104-.103-.241-.155-.448-.259z"/>
-    </svg>
-  </button>
+  <div class="fixed bottom-6 right-4 z-40 flex items-center gap-2 drop-shadow-xl">
+    <span class="bg-white text-neutral-800 text-[11px] font-extrabold px-3 py-1.5 rounded-xl border border-neutral-100 shadow-sm select-none">
+      Tanya Admin
+    </span>
+    <button onclick="hubungiAdminLangsung()" class="bg-emerald-600 text-white p-3.5 rounded-full hover:bg-emerald-700 active:scale-95 transition-all duration-300 flex items-center justify-center border border-white/10" title="Hubungi Kami">
+      <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.66.986 3.288 1.481 5.362 1.483 5.405 0 9.805-4.4 9.808-9.81.002-2.622-1.01-5.087-2.854-6.935C17.062 2.04 14.604 1.026 12 1.026c-5.411 0-9.815 4.403-9.818 9.813-.001 2.083.5 3.731 1.492 5.395L2.68 21.366l5.22-.128s-.13.064-.253-.084zm13.111-7.794c-.207-.104-1.226-.605-1.416-.673-.19-.068-.328-.104-.466.104-.138.207-.535.673-.656.812-.12.138-.241.155-.448.052-.207-.104-.875-.323-1.666-1.027-.615-.548-1.03-1.226-1.15-1.433-.12-.207-.013-.319.091-.422.094-.093.207-.242.311-.363.104-.121.138-.207.207-.346.069-.138.034-.259-.017-.363-.052-.104-.466-1.122-.638-1.54-.168-.405-.333-.349-.466-.349-.121 0-.259-.008-.397-.008-.138 0-.363.052-.553.242-.19.19-.725.708-.725 1.727 0 1.02 1.484 2.005 1.691 2.28.207.276 2.921 4.461 7.078 6.257 1.012.433 1.78.692 2.387.884 1.016.321 1.941.276 2.673.167.814-.121 2.47-.673 2.815-1.329.345-.656.345-1.217.242-1.329-.104-.103-.241-.155-.448-.259z"/>
+      </svg>
+    </button>
+  </div>
 
   <div class="bg-rose-950 text-white pt-16 pb-10 px-4 rounded-b-[2.5rem] shadow-lg text-center relative overflow-hidden w-full">
     <div class="max-w-6xl mx-auto relative z-10 flex flex-col items-center">
@@ -61,7 +66,7 @@
   <div id="flyingCart" class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white p-5 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.12)] border-t border-neutral-100 z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto">
     <div id="cartStage1" class="flex justify-between items-center gap-3">
       <div class="flex items-center gap-3">
-        <button onclick="kosongkanKeranjangBelanja()" class="px-3 py-3 bg-red-50 text-red-600 font-bold rounded-xl text-xs hover:bg-red-100 transition shadow-sm">🗑️ Bersihkan</button>
+        <button onclick="kosongkanKeranjangBelanja()" id="btnBersihkanCart" class="px-3 py-3 bg-red-50 text-red-600 font-bold rounded-xl text-xs hover:bg-red-100 transition shadow-sm">🗑️ Bersihkan</button>
         <div>
           <p class="text-[10px] font-bold text-neutral-400 uppercase">Total Pesanan</p>
           <p id="txtTotalHarga" class="text-lg font-black text-rose-950">Rp 0</p>
@@ -78,13 +83,16 @@
       <div id="wrapperRingkasanNota" class="space-y-3 bg-neutral-50 p-3 rounded-2xl border text-xs max-h-[200px] overflow-y-auto"></div>
       <div class="space-y-2.5">
         <input type="text" id="pembeliNama" placeholder="Nama Lengkap Anda" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
-        <textarea id="pembeliAlamat" placeholder="Alamat Rumah Lengkap / Patokan Lokasi" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950" rows="2"></textarea>
+        <textarea id="pembeliAlamat" placeholder="Alamat Rumah Lengkap / Patokan Alamat" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950" rows="2"></textarea>
         <div class="flex items-center gap-2 px-1 py-0.5">
           <input type="checkbox" id="checkSimpanAlamat" class="w-4 h-4 accent-rose-950 rounded cursor-pointer">
           <label for="checkSimpanAlamat" class="text-[11px] text-neutral-500 font-semibold cursor-pointer select-none">Simpan identitas saya untuk pesanan berikutnya</label>
         </div>
       </div>
-      <button onclick="kirimOrderKeWhatsApp()" id="btnKirimWA" class="w-full bg-emerald-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition">Kirim Pesanan ke WA 🚀</button>
+      <div class="grid grid-cols-4 gap-2">
+        <button onclick="salinNotaKeClipboardSistem()" class="col-span-1 bg-neutral-100 text-neutral-700 font-bold py-3 rounded-xl text-xs border hover:bg-neutral-200 transition">📋 Copy</button>
+        <button onclick="kirimOrderKeWhatsApp()" id="btnKirimWA" class="col-span-3 bg-emerald-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition">Kirim Pesanan ke WA 🚀</button>
+      </div>
     </div>
   </div>
 
@@ -113,7 +121,7 @@
     let statusTutupDarurat = false;
 
     let namaRestoranLive = "WARUNG MUCHSIN ASSEGAF";
-    let nomorWaLive = "628567770135";
+    let nomorWaLive = "628985462249";
 
     document.addEventListener("DOMContentLoaded", () => {
       const savedNama = localStorage.getItem("restoran_pembeli_nama");
@@ -123,12 +131,11 @@
       if(savedNama || savedAlamat) document.getElementById("checkSimpanAlamat").checked = true;
     });
 
-    // 1. SENSOR LIVE PROFIL RESTORAN & RUNNING TEXT
     onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
       if(docSnap.exists()) {
         const data = docSnap.data();
         namaRestoranLive = data.nama || "WARUNG MUCHSIN ASSEGAF";
-        nomorWaLive = data.whatsapp || "628567770135";
+        nomorWaLive = data.whatsapp || "628985462249";
         
         document.title = `${namaRestoranLive} - Menu Digital`;
         document.getElementById("txtNamaRestoran").innerText = namaRestoranLive;
@@ -142,7 +149,6 @@
       }
     });
 
-    // LOGIKA PENYARINGAN MULTI POP-UP MENUMPUK
     onSnapshot(query(collection(db, "pengaturan", "profil", "popups"), orderBy("waktu", "desc"), limit(3)), (snapshot) => {
       const container = document.getElementById("containerMultiPopup");
       container.innerHTML = "";
@@ -187,14 +193,12 @@
       }
     };
 
-    // LOGIKA FITUR BARU: DIRECT HUBUNGI ADMIN WHATSAPP
     window.hubungiAdminLangsung = () => {
       const teksTanya = `Halo Admin, saya ingin bertanya mengenai menu atau layanan restoran...`;
       const urlTanyaWA = `https://api.whatsapp.com/send?phone=${nomorWaLive}&text=${encodeURIComponent(teksTanya)}`;
       window.open(urlTanyaWA, '_blank');
     };
 
-    // 2. SENSOR LIVE JAM OPERASIONAL
     onSnapshot(doc(db, "pengaturan", "operasional"), (docSnap) => {
       if(docSnap.exists()) {
         const data = docSnap.data();
@@ -234,7 +238,7 @@
         btnStage1.className = "bg-rose-950 text-amber-400 font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-rose-900 transition";
         btnStage1.innerText = `Lanjut ke Pengiriman ➡️`;
         btnStage2.disabled = false;
-        btnStage2.className = "w-full bg-emerald-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition";
+        btnStage2.className = "col-span-3 bg-emerald-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition";
         btnStage2.innerText = "Kirim Pesanan ke WA 🚀";
         return true;
       }
@@ -302,25 +306,6 @@
       hitungRingkasanBelanja();
     };
 
-    window.ubahJumlahBelanja = (id, delta) => {
-      const currentQty = keranjangBelanja[id] ? keranjangBelanja[id].qty : 0;
-      const hasilQty = currentQty + delta;
-      
-      if (hasilQty <= 0) { 
-        delete keranjangBelanja[id]; 
-      } else { 
-        if (!keranjangBelanja[id]) {
-          keranjangBelanja[id] = { qty: hasilQty, pedas: "Level 0 (Tidak Pedas)", catatan: "" };
-        } else {
-          keranjangBelanja[id].qty = hasilQty;
-        }
-      }
-      filterDanTampilkanMenu();
-      if (!document.getElementById("cartStage2").classList.contains("hidden")) {
-        susunTampilanNotaTahapDua();
-      }
-    };
-
     window.kosongkanKeranjangBelanja = () => {
       if (Object.keys(keranjangBelanja).length === 0) return;
       if (confirm("Apakah Anda yakin ingin menghapus semua menu dari keranjang?")) {
@@ -342,9 +327,11 @@
 
       const flying = document.getElementById("flyingCart");
       const txtTotal = document.getElementById("txtTotalHarga");
+      const btnClean = document.getElementById("btnBersihkanCart");
 
       if (totalItem > 0) {
         txtTotal.innerText = `Rp ${new Intl.NumberFormat("id-ID").format(total)}`;
+        btnClean.innerText = `🗑️ Bersihkan (${totalItem})`;
         flying.classList.remove("translate-y-full");
         cekStatusWarungRealtime();
       } else {
@@ -419,26 +406,10 @@
       document.getElementById("cartStage1").classList.remove("hidden");
     };
 
-    window.kirimOrderKeWhatsApp = () => {
-      if(!cekStatusWarungRealtime()) {
-        alert("Mohon maaf, warung baru saja tutup. Pesanan Anda tidak dapat diproses.");
-        return; 
-      }
-
+    function bangunStrukturStringNota() {
       const nama = document.getElementById("pembeliNama").value.trim();
       const alamat = document.getElementById("pembeliAlamat").value.trim();
-      const simpanIdentitasChecked = document.getElementById("checkSimpanAlamat").checked;
-
-      if(!nama || !alamat) { alert("Biodata pengiriman wajib diisi lengkap!"); return; }
-
-      if (simpanIdentitasChecked) {
-        localStorage.setItem("restoran_pembeli_nama", nama);
-        localStorage.setItem("restoran_pembeli_alamat", alamat);
-      } else {
-        localStorage.removeItem("restoran_pembeli_nama");
-        localStorage.removeItem("restoran_pembeli_alamat");
-      }
-
+      
       let teksPesanan = `*PESANAN DIGITAL - ${namaRestoranLive}*\n`;
       teksPesanan += `----------------------------------------\n`;
       teksPesanan += `👤 *Nama Pembeli:* ${nama}\n`;
@@ -468,8 +439,44 @@
       teksPesanan += `\n💰 *TOTAL PEMBAYARAN:* *Rp ${new Intl.NumberFormat("id-ID").format(grandTotal)}*\n`;
       teksPesanan += `----------------------------------------\n`;
       teksPesanan += `_Mohon segera dikonfirmasi dan diproses ya, terima kasih!_`;
+      return teksPesanan;
+    }
 
-      const urlWA = `https://api.whatsapp.com/send?phone=${nomorWaLive}&text=${encodeURIComponent(teksPesanan)}`;
+    window.salinNotaKeClipboardSistem = () => {
+      const nama = document.getElementById("pembeliNama").value.trim();
+      const alamat = document.getElementById("pembeliAlamat").value.trim();
+      if(!nama || !alamat) { alert("Biodata pengiriman wajib diisi lengkap sebelum menyalin nota!"); return; }
+
+      const isiStrukNota = bangunStrukturStringNota();
+      navigator.clipboard.writeText(isiStrukNota).then(() => {
+        alert("Nota berhasil disalin ke memori clipboard HP Anda! 📋\nSilakan buka WhatsApp dan paste secara manual ke nomor ruko.");
+      }).catch(err => {
+        alert("Gagal menyalin otomatis, mohon salin manual teks nota Anda.");
+      });
+    };
+
+    window.kirimOrderKeWhatsApp = () => {
+      if(!cekStatusWarungRealtime()) {
+        alert("Mohon maaf, warung baru saja tutup. Pesanan Anda tidak dapat diproses.");
+        return; 
+      }
+
+      const nama = document.getElementById("pembeliNama").value.trim();
+      const alamat = document.getElementById("pembeliAlamat").value.trim();
+      const simpanIdentitasChecked = document.getElementById("checkSimpanAlamat").checked;
+
+      if(!nama || !alamat) { alert("Biodata pengiriman wajib diisi lengkap!"); return; }
+
+      if (simpanIdentitasChecked) {
+        localStorage.setItem("restoran_pembeli_nama", nama);
+        localStorage.setItem("restoran_pembeli_alamat", alamat);
+      } else {
+        localStorage.removeItem("restoran_pembeli_nama");
+        localStorage.removeItem("restoran_pembeli_alamat");
+      }
+
+      const teksNotaSelesai = bangunStrukturStringNota();
+      const urlWA = `https://api.whatsapp.com/send?phone=${nomorWaLive}&text=${encodeURIComponent(teksNotaSelesai)}`;
       window.open(urlWA, '_blank');
     };
   </script>
