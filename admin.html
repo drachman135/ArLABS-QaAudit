@@ -16,10 +16,10 @@
 <body class="bg-[#faf9f6] pb-24">
 
   <div class="bg-rose-950 text-white pt-6 pb-6 px-4 md:px-8 rounded-b-[2rem] shadow-xl w-full">
-    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
       <div class="text-center sm:text-left">
         <h1 class="text-xl font-black text-amber-400 tracking-tight">PANEL KENDALI UTAMA</h1>
-        <p class="text-xs text-rose-200">Warung Muchsin Assegaf • Manajemen Menu & QR</p>
+        <p class="text-xs text-rose-200">Warung Muchsin Assegaf • Manajemen Menu & Jam Operasional</p>
       </div>
       <div class="flex bg-white/10 p-1 rounded-xl gap-1">
         <button onclick="pindahTab('menu')" id="tabBtn-menu" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold bg-white text-rose-950 shadow-sm transition">📋 Kelola Menu</button>
@@ -28,8 +28,34 @@
     </div>
   </div>
 
-  <div class="max-w-4xl mx-auto px-4 mt-6">
+  <div class="max-w-6xl mx-auto px-4 mt-6">
     <div id="tab-menu" class="tab-content space-y-6">
+      
+      <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-neutral-100 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div class="md:col-span-2">
+          <h2 class="text-sm font-black text-neutral-800 uppercase tracking-wider mb-1 flex items-center gap-1.5">🕒 Pengaturan Operasional Warung</h2>
+          <p class="text-[11px] text-neutral-400">Atur jam operasional otomatis atau kunci warung secara mendadak jika ada keperluan darurat.</p>
+          <div class="flex flex-wrap gap-4 mt-3">
+            <div>
+              <label class="block text-[9px] font-bold text-neutral-400 uppercase mb-0.5">Jam Buka (WIB)</label>
+              <input type="number" id="inputJamBuka" min="0" max="23" class="p-2 bg-neutral-50 border rounded-xl text-xs font-bold text-center w-20 outline-none">
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold text-neutral-400 uppercase mb-0.5">Jam Tutup (WIB)</label>
+              <input type="number" id="inputJamTutup" min="0" max="23" class="p-2 bg-neutral-50 border rounded-xl text-xs font-bold text-center w-20 outline-none">
+            </div>
+            <div class="flex items-end">
+              <button onclick="simpanJamOperasional()" class="bg-neutral-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-neutral-800 transition">Simpan Jam 💾</button>
+            </div>
+          </div>
+        </div>
+        <div class="bg-neutral-50 p-4 rounded-2xl border flex flex-col items-center justify-center text-center">
+          <label class="block text-[10px] font-black text-neutral-500 uppercase mb-2">🚨 STATUS DARURAT WARUNG</label>
+          <div id="btnStatusDaruratContainer">
+            </div>
+        </div>
+      </div>
+
       <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-neutral-100">
         <h2 class="text-sm font-black text-neutral-800 uppercase tracking-wider mb-4 flex items-center gap-1.5">✨ Tambah Menu Baru</h2>
         <form id="formMenu" onsubmit="simpanMenuBaru(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -65,7 +91,7 @@
 
       <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-neutral-100">
         <h2 class="text-sm font-black text-neutral-800 uppercase tracking-wider mb-3">📋 Daftar Menu Live di Website</h2>
-        <div id="listAdminMenu" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        <div id="listAdminMenu" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
       </div>
     </div>
 
@@ -91,7 +117,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBlZTatONukCKARuviwEUCiDUMuT03nz3U",
@@ -125,15 +151,60 @@
       });
     });
 
+    // MENGAMBIL DATA KENDALI OPERASIONAL LIVE DARI FIREBASE
+    onSnapshot(doc(db, "pengaturan", "operasional"), (docSnap) => {
+      if(docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById("inputJamBuka").value = data.jamBuka ?? 10;
+        document.getElementById("inputJamTutup").value = data.jamTutup ?? 21;
+        
+        const isTutupDarurat = data.tutupDarurat === true;
+        const containerDarurat = document.getElementById("btnStatusDaruratContainer");
+        
+        if(isTutupDarurat) {
+          containerDarurat.innerHTML = `
+            <p class="text-[11px] font-bold text-red-600 mb-2">🔴 KONDISI: WARUNG DIKUNCI TUTUP</p>
+            <button onclick="setTutupDarurat(false)" class="bg-emerald-600 text-white text-xs font-black px-4 py-2 rounded-xl uppercase tracking-wide hover:bg-emerald-700 transition shadow-sm">
+              🔓 Buka Warung Kembali
+            </button>
+          `;
+        } else {
+          containerDarurat.innerHTML = `
+            <p class="text-[11px] font-bold text-emerald-600 mb-2">🟢 KONDISI: MENGIKUTI JAM OTOMATIS</p>
+            <button onclick="setTutupDarurat(true)" class="bg-red-600 text-white text-xs font-black px-4 py-2 rounded-xl uppercase tracking-wide hover:bg-red-700 transition shadow-sm">
+              🚨 TUTUP DARURAT SEKARANG
+            </button>
+          `;
+        }
+      } else {
+        // Jika belum ada data di firebase, buat dokumen baru bawaan default
+        setDoc(doc(db, "pengaturan", "operasional"), { jamBuka: 10, jamTutup: 21, tutupDarurat: false });
+      }
+    });
+
+    window.simpanJamOperasional = async () => {
+      const jBuka = parseInt(document.getElementById("inputJamBuka").value);
+      const jTutup = parseInt(document.getElementById("inputJamTutup").value);
+      try {
+        await updateDoc(doc(db, "pengaturan", "operasional"), { jamBuka: jBuka, jamTutup: jTutup });
+        alert("Jam operasional berhasil diupdate! 🕒");
+      } catch(err) { alert("Gagal update jam: " + err.message); }
+    };
+
+    window.setTutupDarurat = async (status) => {
+      try {
+        await updateDoc(doc(db, "pengaturan", "operasional"), { tutupDarurat: status });
+        alert(status ? "Warung resmi dikunci TUTUP darurat! 🚫" : "Warung dibuka kembali mengikuti jam otomatis! 🔓");
+      } catch(err) { alert("Gagal ganti status darurat: " + err.message); }
+    };
+
     window.pindahTab = (tabName) => {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-white', 'text-rose-950', 'shadow-sm');
-        btn.classList.add('text-white', 'hover:bg-white/10');
+        btn.className = "tab-btn px-4 py-2 rounded-lg text-xs font-bold text-white hover:bg-white/10 transition";
       });
       document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-      const activeBtn = document.getElementById(`tabBtn-${tabName}`);
-      activeBtn.classList.add('bg-white', 'text-rose-950', 'shadow-sm');
+      document.getElementById(`tabBtn-${tabName}`).className = "tab-btn px-4 py-2 rounded-lg text-xs font-bold bg-white text-rose-950 shadow-sm transition";
     };
 
     window.simpanMenuBaru = async (e) => {
@@ -148,9 +219,7 @@
       if(fileFoto) { base64Foto = await prosesUbahKeBase64(fileFoto); }
 
       try {
-        await addDoc(collection(db, "menu"), {
-          nama, kategori, harga, hargaPromo, foto: base64Foto, tersedia: true
-        });
+        await addDoc(collection(db, "menu"), { nama, kategori, harga, hargaPromo, foto: base64Foto, tersedia: true });
         document.getElementById("formMenu").reset();
         alert("Mantap, menu baru berhasil masuk database! 🔥");
       } catch (err) { alert("Gagal simpan menu: " + err.message); }
@@ -165,11 +234,9 @@
       });
     }
 
-    // FITUR UPDATE: SAKLAR STOK (TOGGLE) NYAMBUNG KE FIREBASE
     window.toggleStokMenu = async (id, currentStatus) => {
-      try {
-        await updateDoc(doc(db, "menu", id), { tersedia: !currentStatus });
-      } catch (err) { alert("Gagal ganti status stok: " + err.message); }
+      try { await updateDoc(doc(db, "menu", id), { tersedia: !currentStatus }); } 
+      catch (err) { alert("Gagal ganti status stok: " + err.message); }
     };
 
     onSnapshot(query(collection(db, "menu"), orderBy("nama", "asc")), (snap) => {
@@ -186,15 +253,15 @@
             <div class="flex items-center gap-3 truncate ${!statusStok ? 'opacity-40 grayscale' : ''}">
               <img src="${m.foto || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" class="w-10 h-10 object-cover rounded-xl bg-neutral-200">
               <div class="truncate">
-                <p class="font-bold text-neutral-800 capitalize">${m.nama}</p>
+                <p class="font-bold text-neutral-800 capitalize truncate">${m.nama}</p>
                 <p class="text-[10px] text-rose-800 font-bold">${hPromo ? `Rp ${hPromo}` : `Rp ${hAsli}`}</p>
               </div>
             </div>
-            <div class="flex gap-1">
-              <button onclick="toggleStokMenu('${d.id}', ${statusStok})" class="px-2.5 py-1.5 rounded-xl font-bold transition ${statusStok ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-neutral-100 text-neutral-500'}">
-                ${statusStok ? '✅ Tersedia' : '🚫 Habis'}
+            <div class="flex gap-1 flex-shrink-0">
+              <button onclick="toggleStokMenu('${d.id}', ${statusStok})" class="px-2 py-1.5 rounded-xl font-bold transition ${statusStok ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-neutral-100 text-neutral-500'}">
+                ${statusStok ? '✅ Ada' : '🚫 Habis'}
               </button>
-              <button onclick="hapusMenuID('${d.id}')" class="px-2.5 py-1.5 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition">Hapus</button>
+              <button onclick="hapusMenuID('${d.id}')" class="px-2 py-1.5 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition">Hapus</button>
             </div>
           </div>`;
       });
