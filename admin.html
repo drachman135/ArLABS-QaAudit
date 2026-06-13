@@ -210,8 +210,6 @@
         }
         if(data.whatsapp) document.getElementById("profilWA").placeholder = data.whatsapp;
         if(data.alamat) document.getElementById("profilAlamat").placeholder = data.alamat;
-        
-        // Atur isi placeholder input pengumuman
         document.getElementById("profilTickerText").placeholder = data.tickerText || "Belum ada teks berjalan aktif.";
         document.getElementById("profilPopupText").placeholder = data.popupText || "Belum ada pengumuman pop-up aktif.";
       }
@@ -271,19 +269,15 @@
       } catch (err) { alert("Gagal update profil: " + err.message); }
     };
 
-    // REVISI FITUR: FUNGSI TOMBOL INSTAN UNTUK MENGHAPUS TICKER / POP-UP DARI DATABASE
     window.hapusElemenPengumuman = async (fieldNama) => {
       if (confirm(`Apakah Anda yakin ingin menonaktifkan dan menghapus data ${fieldNama === 'tickerText' ? 'Teks Berjalan' : 'Pop-Up'} ini?`)) {
         try {
           const docRef = doc(db, "pengaturan", "profil");
           const updateObject = {};
-          updateObject[fieldNama] = ""; // Mengosongkan string di Firestore
-          
+          updateObject[fieldNama] = "";
           await updateDoc(docRef, updateObject);
           alert(`Sukses! ${fieldNama === 'tickerText' ? 'Teks Berjalan' : 'Pop-Up'} telah dinonaktifkan.`);
-        } catch (err) {
-          alert("Gagal menghapus elemen pengumuman: " + err.message);
-        }
+        } catch (err) { alert("Gagal menghapus elemen pengumuman: " + err.message); }
       }
     };
 
@@ -354,6 +348,12 @@
       } catch (err) { alert("Gagal menambahkan menu: " + err); }
     };
 
+    // PERBAIKAN FIXED: Data Firebase dimuat utuh sebelum memicu fungsi visual filter rendering
+    onSnapshot(query(collection(db, "menu"), orderBy("nama", "asc")), (snap) => {
+      semuaMenuAdminData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderTabelAdminLive();
+    });
+
     window.setFilterTabelAdmin = (kat) => {
       filterTabelAktif = kat;
       document.querySelectorAll('.tab-tabel-btn').forEach(btn => {
@@ -366,6 +366,7 @@
     function renderTabelAdminLive() {
       const tbody = document.getElementById("tbodyMenuLive");
       tbody.innerHTML = "";
+      
       const filteredData = semuaMenuAdminData.filter(m => filterTabelAktif === "semua" || m.kategori === filterTabelAktif);
 
       if(filteredData.length === 0) {
@@ -390,7 +391,7 @@
             </td>
             <td class="py-3 px-2 text-center">
               <div class="flex justify-center gap-1.5" id="cellAksi-${m.id}">
-                <button onclick="aktifkanQuickEdit('${m.id}', '${m.nama}', ${m.harga}, ${m.hargaPromo || 0})" class="bg-white text-neutral-700 font-bold px-2 py-1 rounded-lg border text-[10px] hover:bg-neutral-50 transition">Edit ✏️</button>
+                <button onclick="aktifkanQuickEdit ('${m.id}', '${m.nama}', ${m.harga}, ${m.hargaPromo || 0})" class="bg-white text-neutral-700 font-bold px-2 py-1 rounded-lg border text-[10px] hover:bg-neutral-50 transition">Edit ✏️</button>
                 <button onclick="hapusMenuDokumen('${m.id}')" class="bg-rose-50 text-rose-700 font-bold px-2 py-1 rounded-lg text-[10px] border border-rose-200/50 hover:bg-rose-100 transition">Hapus</button>
               </div>
             </td>
