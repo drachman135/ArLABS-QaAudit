@@ -94,9 +94,13 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-4 gap-2">
-        <button onclick="salinNotaKeClipboardSistem()" class="col-span-1 bg-neutral-100 text-neutral-700 font-bold py-3 rounded-xl text-xs border hover:bg-neutral-200 transition">📋 Copy</button>
-        <button onclick="kirimOrderKeWhatsApp()" id="btnKirimWA" class="col-span-3 bg-emerald-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition">Kirim Pesanan ke WA 🚀</button>
+      <div class="flex gap-2 w-full">
+        <button onclick="salinNotaKeClipboardSistem()" class="flex-none px-5 bg-neutral-100 text-neutral-700 font-bold py-3.5 rounded-xl text-xs border hover:bg-neutral-200 transition shadow-sm flex items-center justify-center gap-1">
+          📋 Copy
+        </button>
+        <button onclick="kirimOrderKeWhatsApp()" id="btnKirimWA" class="flex-1 bg-emerald-600 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition flex items-center justify-center gap-1">
+          Kirim Pesanan ke WA 🚀
+        </button>
       </div>
     </div>
   </div>
@@ -234,7 +238,7 @@
         btnStage1.innerText = `🚨 MAAF, WARUNG SEDANG TUTUP`;
         if(btnStage2) {
           btnStage2.disabled = true;
-          btnStage2.className = "w-full bg-red-700 text-neutral-200 font-black py-3 rounded-xl text-[10px] uppercase cursor-not-allowed text-center shadow-none";
+          btnStage2.className = "w-full bg-red-700 text-neutral-200 font-black py-3 rounded-xl text-[10px] uppercase cursor-not-allowed text-center shadow-none flex items-center justify-center";
           btnStage2.innerText = "🚨 GAGAL: WARUNG SUDAH TUTUP";
         }
         return false;
@@ -246,7 +250,7 @@
         btnStage1.innerText = `Lanjut ke Pengiriman ➡️`;
         if(btnStage2) {
           btnStage2.disabled = false;
-          btnStage2.className = "w-full bg-emerald-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition";
+          btnStage2.className = "flex-1 bg-emerald-600 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition flex items-center justify-center gap-1";
           btnStage2.innerText = "Kirim Pesanan ke WA 🚀";
         }
         return true;
@@ -270,7 +274,6 @@
       }
 
       filtered.forEach(m => {
-        // PERBAIKAN CRITICAL: Membaca properti .qty di dalam objek, jika tidak ada setel ke 0
         const qty = keranjangBelanja[m.id] ? keranjangBelanja[m.id].qty : 0;
         const hargaTampil = m.hargaPromo ? m.hargaPromo : m.harga;
         const formatHarga = new Intl.NumberFormat("id-ID").format(hargaTampil);
@@ -430,7 +433,7 @@
       teksPesanan += `👤 *Nama Pembeli:* ${nama}\n`;
       teksPesanan += `📍 *Alamat Kirim:* ${alamat}\n`;
       teksPesanan += `----------------------------------------\n\n`;
-      teksPesanan += `📦 *DAFTAR PESANAN VALIDIATED:*\n`;
+      teksPesanan += `📦 *DAFTAR PESANAN VALIDATED:*\n`;
 
       let grandTotal = 0;
       semuaMenuData.forEach(m => {
