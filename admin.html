@@ -49,14 +49,20 @@
             <textarea id="profilAlamat" rows="2" placeholder="Ubah alamat ruko" class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950"></textarea>
           </div>
           
-          <div class="pt-2 border-t border-neutral-200">
-            <label class="text-[10px] font-bold text-orange-600 uppercase">📢 Teks Berjalan Customer <span class="text-[9px] text-neutral-400 font-normal">(Opsional)</span></label>
-            <input type="text" id="profilTickerText" placeholder="Contoh: Promo khusus hari ini diskon 20%!" class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950 mt-0.5">
+          <div class="pt-2 border-t border-neutral-200 space-y-1">
+            <div class="flex justify-between items-center">
+              <label class="text-[10px] font-bold text-orange-600 uppercase">📢 Teks Berjalan Customer</label>
+              <button onclick="hapusElemenPengumuman('tickerText')" class="text-[9px] font-black text-red-600 hover:underline">Hapus Teks Berjalan 🗑️</button>
+            </div>
+            <input type="text" id="profilTickerText" placeholder="Tulis pengumuman berjalan baru..." class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
           </div>
 
-          <div>
-            <label class="text-[10px] font-bold text-red-600 uppercase">🚨 Pop-Up Tengah Halaman <span class="text-[9px] text-neutral-400 font-normal">(Opsional)</span></label>
-            <textarea id="profilPopupText" rows="2" placeholder="Contoh: Info: Toko libur khusus tanggal 17 Agustus mendatang." class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950 mt-0.5"></textarea>
+          <div class="space-y-1">
+            <div class="flex justify-between items-center">
+              <label class="text-[10px] font-bold text-red-600 uppercase">🚨 Pop-Up Tengah Halaman</label>
+              <button onclick="hapusElemenPengumuman('popupText')" class="text-[9px] font-black text-red-600 hover:underline">Hapus Pop-Up 🗑️</button>
+            </div>
+            <textarea id="profilPopupText" rows="2" placeholder="Tulis teks pengumuman tengah layar baru..." class="w-full p-2 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950"></textarea>
           </div>
 
           <button onclick="simpanProfilRestoran()" class="w-full bg-neutral-900 text-white text-xs font-black py-2 rounded-xl uppercase tracking-wider hover:bg-neutral-800 transition">Simpan Perubahan 💾</button>
@@ -138,7 +144,6 @@
   <div class="bg-white p-5 rounded-3xl shadow-sm border border-neutral-200/60 space-y-4">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-3">
       <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">📋 Semua Katalog Live di Database</h2>
-      
       <div class="flex bg-neutral-100 p-1 rounded-xl gap-1 border">
         <button onclick="setFilterTabelAdmin('semua')" id="tabTabel-semua" class="tab-tabel-btn px-3 py-1.5 rounded-lg text-[10px] font-black bg-white text-neutral-800 shadow-sm transition">Semua</button>
         <button onclick="setFilterTabelAdmin('makanan')" id="tabTabel-makanan" class="tab-tabel-btn px-3 py-1.5 rounded-lg text-[10px] font-black text-neutral-500 hover:text-neutral-800 transition">🍲 Makanan</button>
@@ -146,7 +151,6 @@
         <button onclick="setFilterTabelAdmin('cemilan')" id="tabTabel-cemilan" class="tab-tabel-btn px-3 py-1.5 rounded-lg text-[10px] font-black text-neutral-500 hover:text-neutral-800 transition">🍿 Cemilan</button>
       </div>
     </div>
-
     <div class="overflow-x-auto">
       <table class="w-full text-left text-xs border-collapse">
         <thead>
@@ -197,7 +201,6 @@
       }
     };
 
-    // MENDENGARKAN DATA PROFIL RESTORAN LIVE
     onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -207,12 +210,13 @@
         }
         if(data.whatsapp) document.getElementById("profilWA").placeholder = data.whatsapp;
         if(data.alamat) document.getElementById("profilAlamat").placeholder = data.alamat;
-        if(data.tickerText) document.getElementById("profilTickerText").placeholder = data.tickerText;
-        if(data.popupText) document.getElementById("profilPopupText").placeholder = data.popupText;
+        
+        // Atur isi placeholder input pengumuman
+        document.getElementById("profilTickerText").placeholder = data.tickerText || "Belum ada teks berjalan aktif.";
+        document.getElementById("profilPopupText").placeholder = data.popupText || "Belum ada pengumuman pop-up aktif.";
       }
     });
 
-    // MENDENGARKAN DATA JAM OPERASIONAL
     onSnapshot(doc(db, "pengaturan", "operasional"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -258,13 +262,29 @@
         } else {
           await updateDoc(docRef, dataUpdate);
         }
-        alert("Perubahan profil dan pengumuman berhasil disimpan!");
+        alert("Perubahan data berhasil disimpan secara live!");
         document.getElementById("profilNama").value = "";
         document.getElementById("profilWA").value = "";
         document.getElementById("profilAlamat").value = "";
         document.getElementById("profilTickerText").value = "";
         document.getElementById("profilPopupText").value = "";
       } catch (err) { alert("Gagal update profil: " + err.message); }
+    };
+
+    // REVISI FITUR: FUNGSI TOMBOL INSTAN UNTUK MENGHAPUS TICKER / POP-UP DARI DATABASE
+    window.hapusElemenPengumuman = async (fieldNama) => {
+      if (confirm(`Apakah Anda yakin ingin menonaktifkan dan menghapus data ${fieldNama === 'tickerText' ? 'Teks Berjalan' : 'Pop-Up'} ini?`)) {
+        try {
+          const docRef = doc(db, "pengaturan", "profil");
+          const updateObject = {};
+          updateObject[fieldNama] = ""; // Mengosongkan string di Firestore
+          
+          await updateDoc(docRef, updateObject);
+          alert(`Sukses! ${fieldNama === 'tickerText' ? 'Teks Berjalan' : 'Pop-Up'} telah dinonaktifkan.`);
+        } catch (err) {
+          alert("Gagal menghapus elemen pengumuman: " + err.message);
+        }
+      }
     };
 
     window.simpanJamOperasional = async () => {
@@ -334,13 +354,6 @@
       } catch (err) { alert("Gagal menambahkan menu: " + err); }
     };
 
-    // MENDENGARKAN DAFTAR KATALOG DARI FIREBASE
-    onSnapshot(query(collection(db, "menu"), orderBy("nama", "asc")), (snap) => {
-      semuaMenuAdminData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderTabelAdminLive();
-    });
-
-    // FITUR: SWITCH KATEGORI FILTER DI TABEL ADMIN
     window.setFilterTabelAdmin = (kat) => {
       filterTabelAktif = kat;
       document.querySelectorAll('.tab-tabel-btn').forEach(btn => {
@@ -353,7 +366,6 @@
     function renderTabelAdminLive() {
       const tbody = document.getElementById("tbodyMenuLive");
       tbody.innerHTML = "";
-
       const filteredData = semuaMenuAdminData.filter(m => filterTabelAktif === "semua" || m.kategori === filterTabelAktif);
 
       if(filteredData.length === 0) {
@@ -363,18 +375,14 @@
 
       filteredData.forEach(m => {
         const isTersedia = m.tersedia !== false;
-        
         tbody.innerHTML += `
-          <tr id="row-${m.id}" class="border-b hover:bg-neutral-50/50 transition">
-            <td class="py-3 px-2">
-              <img src="${m.foto || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=60'}" class="w-10 h-10 object-cover rounded-xl bg-neutral-100">
-            </td>
+          <tr class="border-b hover:bg-neutral-50/50 transition">
+            <td class="py-3 px-2"><img src="${m.foto || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=60'}" class="w-10 h-10 object-cover rounded-xl bg-neutral-100"></td>
             <td class="py-3 px-2 font-bold text-neutral-800 capitalize" id="cellNama-${m.id}">${m.nama}</td>
             <td class="py-3 px-2 uppercase text-[10px] tracking-wider text-neutral-400 font-extrabold">${m.kategori}</td>
             <td class="py-3 px-2 font-bold text-rose-950" id="cellHarga-${m.id}">
               ${m.hargaPromo ? `Promo: Rp ${new Intl.NumberFormat("id-ID").format(m.hargaPromo)} <span class="text-[10px] text-neutral-400 line-through block font-normal">Normal: Rp ${new Intl.NumberFormat("id-ID").format(m.harga)}</span>` : `Rp ${new Intl.NumberFormat("id-ID").format(m.harga)}`}
             </td>
-            
             <td class="py-3 px-2 text-center">
               <button onclick="toggleKetersediaanStok('${m.id}', ${isTersedia})" class="px-2.5 py-1 rounded-full text-[10px] font-black ${isTersedia ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'} shadow-sm transition">
                 ${isTersedia ? '🟢 TERSEDIA' : '🔴 HABIS'}
@@ -386,26 +394,20 @@
                 <button onclick="hapusMenuDokumen('${m.id}')" class="bg-rose-50 text-rose-700 font-bold px-2 py-1 rounded-lg text-[10px] border border-rose-200/50 hover:bg-rose-100 transition">Hapus</button>
               </div>
             </td>
-          </tr>
-        `;
+          </tr>`;
       });
     }
 
-    // FITUR UTAMA: QUICK EDIT DATA MENU SEJAJAR (INLINE EDITING)
     window.aktifkanQuickEdit = (id, namaLama, hargaLama, promoLama) => {
       document.getElementById(`cellNama-${id}`).innerHTML = `<input type="text" id="editNama-${id}" value="${namaLama}" class="p-1 border rounded bg-white text-xs font-semibold max-w-[150px] outline-none">`;
-      
       document.getElementById(`cellHarga-${id}`).innerHTML = `
         <div class="space-y-1">
           <input type="number" id="editHarga-${id}" value="${hargaLama}" class="p-1 border rounded bg-white text-xs font-semibold max-w-[90px] block outline-none" title="Harga Normal">
           <input type="number" id="editPromo-${id}" value="${promoLama || ''}" placeholder="Promo (Opsional)" class="p-1 border rounded bg-white text-[11px] font-medium max-w-[90px] block outline-none">
-        </div>
-      `;
-
+        </div>`;
       document.getElementById(`cellAksi-${id}`).innerHTML = `
         <button onclick="simpanQuickEdit('${id}')" class="bg-emerald-600 text-white font-black px-2 py-1 rounded-lg text-[10px] shadow-sm hover:bg-emerald-700 transition">Save</button>
-        <button onclick="renderTabelAdminLive()" class="bg-neutral-200 text-neutral-700 font-bold px-2 py-1 rounded-lg text-[10px] hover:bg-neutral-300 transition">Cancel</button>
-      `;
+        <button onclick="renderTabelAdminLive()" class="bg-neutral-200 text-neutral-700 font-bold px-2 py-1 rounded-lg text-[10px] hover:bg-neutral-300 transition">Cancel</button>`;
     };
 
     window.simpanQuickEdit = async (id) => {
@@ -417,11 +419,7 @@
       if (!namaBaru || !hargaBaru) { alert("Nama menu dan harga tidak boleh kosong!"); return; }
 
       try {
-        await updateDoc(doc(db, "menu", id), {
-          nama: namaBaru,
-          harga: hargaBaru,
-          hargaPromo: promoBaru
-        });
+        await updateDoc(doc(db, "menu", id), { nama: namaBaru, harga: hargaBaru, hargaPromo: promoBaru });
         alert("Menu berhasil diperbarui secara instan!");
       } catch (err) { alert("Gagal update menu: " + err.message); }
     };
