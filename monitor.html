@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Radar Pelacak Aset Warung</title>
+  <title>Satelit Radar Mandiri</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
@@ -12,42 +12,32 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; }
   </style>
 </head>
-<body class="p-4 sm:p-8 max-w-md mx-auto min-h-screen flex flex-col justify-between text-white">
+<body class="p-4 max-w-md mx-auto min-h-screen flex flex-col justify-between text-white space-y-4">
 
-  <div class="space-y-6 pt-6">
-    <div class="text-center bg-slate-800/50 p-4 rounded-3xl border border-slate-700/50">
-      <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-2xl flex items-center justify-center text-xl mx-auto mb-2 animate-pulse">🛰️</div>
-      <h1 class="text-lg font-black tracking-tight text-amber-400 uppercase">RADAR MILIK OWNER</h1>
-      <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Sistem Pelacak Posisi Device Pegawai Live</p>
-    </div>
+  <div class="text-center bg-slate-800/50 p-4 rounded-3xl border border-slate-700/50">
+    <div class="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center text-lg mx-auto mb-1 animate-pulse">🎯</div>
+    <h1 class="text-base font-black tracking-tight text-emerald-400 uppercase">MONITORING LOKASI LIVE</h1>
+    <p class="text-[9px] text-slate-400 uppercase tracking-widest">Peta Pergerakan Real-time Tanpa Aplikasi Eksternal</p>
+  </div>
 
-    <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 space-y-5 shadow-xl">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <span class="text-xs font-black uppercase text-slate-400 tracking-wider">Status Koneksi:</span>
-        <span id="txtStatusAktif" class="px-2.5 py-1 bg-amber-500/20 text-amber-400 rounded-full text-[10px] font-black tracking-wide animate-pulse">MEMINTA DATA...</span>
-      </div>
-
-      <div class="space-y-3.5 text-xs font-semibold">
-        <div class="flex justify-between">
-          <span class="text-slate-400">Garis Lintang (Lat):</span>
-          <span id="txtLat" class="text-slate-200 font-mono">Loading...</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-400">Garis Bujur (Lng):</span>
-          <span id="txtLng" class="text-slate-200 font-mono">Loading...</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-400">Pembaruan Terakhir:</span>
-          <span id="txtWaktu" class="text-slate-200">Loading...</span>
-        </div>
-      </div>
+  <div class="bg-slate-800 rounded-[2rem] border border-slate-700 flex-1 min-h-[380px] overflow-hidden shadow-2xl relative">
+    <iframe id="petaGoogleEmbedMandiri" class="w-full h-full border-0" src="about:blank" allowfullscreen="" loading="lazy"></iframe>
+    
+    <div id="loadingPeta" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center text-center p-4">
+      <div class="w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-3"></div>
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Menghubungkan ke Satelit GPS...</p>
     </div>
   </div>
 
-  <div class="pb-6 pt-4">
-    <a id="btnBukaMaps" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 pointer-events-none opacity-40">
-      🗺️ LIHAT POSISI DI GOOGLE MAPS LIVE
-    </a>
+  <div class="bg-slate-800 p-4 rounded-[2rem] border border-slate-700 grid grid-cols-2 gap-3 text-center shadow-xl">
+    <div class="bg-slate-900/50 p-2 rounded-2xl border border-slate-700/30">
+      <p class="text-[9px] font-bold text-slate-500 uppercase">Koordinat Posisi</p>
+      <p id="txtKoordinat" class="text-xs font-mono text-slate-200 mt-0.5">Mencari...</p>
+    </div>
+    <div class="bg-slate-900/50 p-2 rounded-2xl border border-slate-700/30">
+      <p class="text-[9px] font-bold text-slate-500 uppercase">Koneksi Update</p>
+      <p id="txtWaktu" class="text-xs text-emerald-400 font-bold mt-0.5 animate-pulse">Sinkronisasi...</p>
+    </div>
   </div>
 
   <script type="module">
@@ -66,28 +56,25 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Dengarkan perubahan database koordinat dari device pegawai secara real-time
+    // Menangkap perubahan data dari Background Service HP pegawai secara langsung
     onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
       if (docSnap.exists() && docSnap.data().koordinatOwner) {
         const gps = docSnap.data().koordinatOwner;
         
-        document.getElementById("txtLat").innerText = gps.latitude;
-        document.getElementById("txtLng").innerText = gps.longitude;
+        // Update data teks
+        document.getElementById("txtKoordinat").innerText = `${parseFloat(gps.latitude).toFixed(4)}, ${parseFloat(gps.longitude).toFixed(4)}`;
+        document.getElementById("txtWaktu").innerText = new Date(parseInt(gps.waktuUpdate)).toLocaleTimeString('id-ID') + " WIB";
         
-        // Format waktu lokal Indonesia
-        const opsiWaktu = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
-        document.getElementById("txtWaktu").innerText = new Date(gps.waktuUpdate).toLocaleTimeString('id-ID', opsiWaktu) + " WIB";
+        // REVISI LAYOUT PETA: Refresh isi iframe Google Maps murni di dalam layar agar titik bergeser live!
+        const urlPetaEmbed = `https://maps.google.com/maps?q=${gps.latitude},${gps.longitude}&z=16&output=embed`;
+        const iframe = document.getElementById("petaGoogleEmbedMandiri");
         
-        const txtStatus = document.getElementById("txtStatusAktif");
-        txtStatus.innerText = "🟢 TERKONEKSI & LIVE";
-        txtStatus.className = "px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-black tracking-wide animate-pulse";
+        if (iframe.src !== urlPetaEmbed) {
+          iframe.src = urlPetaEmbed;
+        }
 
-        // Pasang link langsung tembus ke aplikasi Google Maps bawaan HP Owner
-        const btnMaps = document.getElementById("btnBukaMaps");
-        btnMaps.href = `geo:${gps.latitude},${gps.longitude}?q=${gps.latitude},${gps.longitude}(Posisi+Pegawai)`;
-        btnMaps.classList.remove("pointer-events-none", "opacity-40");
-      } else {
-        document.getElementById("txtStatusAktif").innerText = "🔴 BELUM ADA SINYAL GPS";
+        // Sembunyikan layar loading jika peta sudah siap
+        document.getElementById("loadingPeta").classList.add("hidden");
       }
     });
   </script>
