@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radar Pelacak Aset Warung</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; }
+  </style>
+</head>
+<body class="p-4 sm:p-8 max-w-md mx-auto min-h-screen flex flex-col justify-between text-white">
+
+  <div class="space-y-6 pt-6">
+    <div class="text-center bg-slate-800/50 p-4 rounded-3xl border border-slate-700/50">
+      <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-2xl flex items-center justify-center text-xl mx-auto mb-2 animate-pulse">🛰️</div>
+      <h1 class="text-lg font-black tracking-tight text-amber-400 uppercase">RADAR MILIK OWNER</h1>
+      <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Sistem Pelacak Posisi Device Pegawai Live</p>
+    </div>
+
+    <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700 space-y-5 shadow-xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <span class="text-xs font-black uppercase text-slate-400 tracking-wider">Status Koneksi:</span>
+        <span id="txtStatusAktif" class="px-2.5 py-1 bg-amber-500/20 text-amber-400 rounded-full text-[10px] font-black tracking-wide animate-pulse">MEMINTA DATA...</span>
+      </div>
+
+      <div class="space-y-3.5 text-xs font-semibold">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Garis Lintang (Lat):</span>
+          <span id="txtLat" class="text-slate-200 font-mono">Loading...</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Garis Bujur (Lng):</span>
+          <span id="txtLng" class="text-slate-200 font-mono">Loading...</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Pembaruan Terakhir:</span>
+          <span id="txtWaktu" class="text-slate-200">Loading...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pb-6 pt-4">
+    <a id="btnBukaMaps" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 pointer-events-none opacity-40">
+      🗺️ LIHAT POSISI DI GOOGLE MAPS LIVE
+    </a>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBlZTatONukCKARuviwEUCiDUMuT03nz3U",
+      authDomain: "warungmuchsinassegaf.firebaseapp.com",
+      projectId: "warungmuchsinassegaf",
+      storageBucket: "warungmuchsinassegaf.firebasestorage.app",
+      messagingSenderId: "32676861503",
+      appId: "1:32676861503:web:e35868f9daf6940dbe8a8a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Dengarkan perubahan database koordinat dari device pegawai secara real-time
+    onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().koordinatOwner) {
+        const gps = docSnap.data().koordinatOwner;
+        
+        document.getElementById("txtLat").innerText = gps.latitude;
+        document.getElementById("txtLng").innerText = gps.longitude;
+        
+        // Format waktu lokal Indonesia
+        const opsiWaktu = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        document.getElementById("txtWaktu").innerText = new Date(gps.waktuUpdate).toLocaleTimeString('id-ID', opsiWaktu) + " WIB";
+        
+        const txtStatus = document.getElementById("txtStatusAktif");
+        txtStatus.innerText = "🟢 TERKONEKSI & LIVE";
+        txtStatus.className = "px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-black tracking-wide animate-pulse";
+
+        // Pasang link langsung tembus ke aplikasi Google Maps bawaan HP Owner
+        const btnMaps = document.getElementById("btnBukaMaps");
+        btnMaps.href = `geo:${gps.latitude},${gps.longitude}?q=${gps.latitude},${gps.longitude}(Posisi+Pegawai)`;
+        btnMaps.classList.remove("pointer-events-none", "opacity-40");
+      } else {
+        document.getElementById("txtStatusAktif").innerText = "🔴 BELUM ADA SINYAL GPS";
+      }
+    });
+  </script>
+</body>
+</html>
