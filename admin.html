@@ -306,37 +306,50 @@
     window.toggleTutupDarurat = async () => { /* Logic Emergency */ };
 
     // PERBAIKAN SINTAKS: Fitur Pelacak Lokasi Owner Otomatis (Anti-Error JavaScript)
-    function lacakDanSimpanLokasiOwner() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
+    function mulaiLiveTrackingSistem() {
+  const txtGps = document.getElementById("statusGpsOwner");
+  
+  if (navigator.geolocation) {
+    // Jalankan fungsi pengiriman koordinat secara berulang (Interval)
+    setInterval(() => {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        try {
+          // Timpa data koordinat ruko dengan titik terbaru di Firebase
+          await setDoc(doc(db, "pengaturan", "profil"), {
+            koordinatOwner: {
+              latitude: lat,
+              longitude: lng,
+              waktuUpdate: Date.now(),
+              linkMaps: `https://www.google.com/maps?q=${lat},${lng}`,
+              statusAktivitas: "📱 Aplikasi Sedang Aktif & Bergerak"
+            }
+          }, { merge: true });
           
-          try {
-            // Sinkronisasi data koordinat ruko ke Firebase
-            await setDoc(doc(db, "pengaturan", "profil"), {
-              koordinatOwner: {
-                latitude: lat,
-                longitude: lng,
-                waktuUpdate: Date.now(),
-                linkMaps: `https://www.google.com/maps?q=${lat},${lng}`
-              }
-            }, { merge: true });
-            console.log("Lokasi Owner sukses disinkronkan ke Firebase: ", lat, lng);
-          } catch (err) {
-            console.error("Gagal simpan lokasi ke Firebase: " + err.message);
+          if(txtGps) {
+            txtGps.className = "text-[10px] text-emerald-400 font-black mt-1 animate-pulse";
+            txtGps.innerText = `🟢 LIVE GPS AKTIF (Update Otomatis) • Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
           }
-        }, (error) => { // PERBAIKAN: Menggunakan tanda => bukan ->
-          console.warn("Akses lokasi ditolak atau mati: " + error.message);
-        }, {
-          enableHighAccuracy: true, 
-          timeout: 10000
-        });
-      }
-    }
+          console.log("Sinyal GPS sukses dipancarkan ke Firebase:", lat, lng);
+        } catch (err) {
+          console.error("Gagal sinkronisasi GPS ke server: " + err.message);
+        }
+      }, (error) => {
+        if(txtGps) txtGps.innerText = "🚫 GPS Bermasalah / Izin Lokasi Dicabut";
+      }, {
+        enableHighAccuracy: true, // WAJIB: Memaksa menggunakan GPS Hardware asli HP agar akurat, bukan menebak dari IP Internet
+        timeout: 8000
+      });
+    }, 10000); // 10000 milidetik = 10 detik sekali pancar
+  } else {
+    if(txtGps) txtGps.innerText = "❌ Device ini tidak mendukung sensor GPS";
+  }
+}
 
-    // Jalankan pelacakan otomatis 3 detik setelah halaman admin terbuka sempurna
-    setTimeout(lacakDanSimpanLokasiOwner, 3000);
+// Jalankan mesin pelacak otomatis 3 detik setelah halaman terbuka sempurna
+setTimeout(mulaiLiveTrackingSistem, 3000);
   </script>
 </body>
 </html>
