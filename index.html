@@ -33,7 +33,7 @@
     
     <div id="wrapperTombolInstalPWA" class="hidden flex items-center gap-2 animate-bounce">
       <span class="bg-white text-neutral-800 text-[11px] font-extrabold px-3 py-1.5 rounded-xl border border-neutral-100 shadow-sm select-none">
-        Simpan Aplikasi
+        Install Aplikasi
       </span>
       <button onclick="pemicuInstalasiAplikasiManual()" class="bg-amber-500 text-white p-3.5 rounded-full hover:bg-amber-600 active:scale-95 transition-all duration-300 flex items-center justify-center border border-white/10" title="Instal Aplikasi ke HP">
         <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -161,11 +161,11 @@
       e.preventDefault();
       // Simpan event ke memori lokal sistem
       pemicuInstalasiBawaanBrowser = e;
-      // Munculkan tombol melayang "Simpan Aplikasi 📲" ke hadapan pelanggan
+      // Munculkan tombol melayang "Install Aplikasi 📲" ke hadapan pelanggan
       document.getElementById('wrapperTombolInstalPWA').classList.remove('hidden');
     });
 
-    // Fungsi pemicu saat tombol kuning "Simpan Aplikasi" ditekan manual oleh pembeli
+    // Fungsi pemicu saat tombol kuning "Install Aplikasi" ditekan manual oleh pembeli
     window.pemicuInstalasiAplikasiManual = () => {
       if (pemicuInstalasiBawaanBrowser) {
         // Pancing kembali jendela instalasi resmi keluar ke layar ruko
