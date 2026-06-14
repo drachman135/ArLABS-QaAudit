@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Satelit Radar Mandiri</title>
+  <title>Satelit Radar Mandiri Premium</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
@@ -12,31 +12,32 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; }
   </style>
 </head>
-<body class="p-4 max-w-md mx-auto min-h-screen flex flex-col justify-between text-white space-y-4">
+<body class="h-screen w-full flex flex-col justify-between text-white p-3 overflow-hidden box-border">
 
-  <div class="text-center bg-slate-800/50 p-4 rounded-3xl border border-slate-700/50">
-    <div class="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center text-lg mx-auto mb-1 animate-pulse">🎯</div>
-    <h1 class="text-base font-black tracking-tight text-emerald-400 uppercase">MONITORING LOKASI LIVE</h1>
-    <p class="text-[9px] text-slate-400 uppercase tracking-widest">Peta Pergerakan Real-time Tanpa Aplikasi Eksternal</p>
+  <div class="text-center bg-slate-800/60 p-3 rounded-2xl border border-slate-700/50 flex-shrink-0">
+    <div class="flex items-center justify-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <h1 class="text-xs font-black tracking-widest text-emerald-400 uppercase">MONITORING LOKASI LIVE RESTORAN</h1>
+    </div>
   </div>
 
-  <div class="bg-slate-800 rounded-[2rem] border border-slate-700 flex-1 min-h-[380px] overflow-hidden shadow-2xl relative">
-    <iframe id="petaGoogleEmbedMandiri" class="w-full h-full border-0" src="about:blank" allowfullscreen="" loading="lazy"></iframe>
+  <div class="bg-slate-800 rounded-3xl border border-slate-700 flex-1 w-full my-3 overflow-hidden shadow-2xl relative">
+    <iframe id="petaGoogleEmbedMandiri" class="w-full h-full border-0 block" src="about:blank" allowfullscreen="" loading="lazy"></iframe>
     
-    <div id="loadingPeta" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center text-center p-4">
-      <div class="w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-3"></div>
-      <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Menghubungkan ke Satelit GPS...</p>
+    <div id="loadingPeta" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center text-center p-4 transition-opacity duration-500">
+      <div class="w-7 h-7 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sinkronisasi Titik Satelit GPS...</p>
     </div>
   </div>
 
-  <div class="bg-slate-800 p-4 rounded-[2rem] border border-slate-700 grid grid-cols-2 gap-3 text-center shadow-xl">
-    <div class="bg-slate-900/50 p-2 rounded-2xl border border-slate-700/30">
-      <p class="text-[9px] font-bold text-slate-500 uppercase">Koordinat Posisi</p>
-      <p id="txtKoordinat" class="text-xs font-mono text-slate-200 mt-0.5">Mencari...</p>
+  <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 grid grid-cols-2 gap-3 text-center shadow-xl flex-shrink-0">
+    <div class="bg-slate-900/50 p-2 rounded-xl border border-slate-700/30">
+      <p class="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Koordinat Terkunci</p>
+      <p id="txtKoordinat" class="text-xs font-mono text-slate-200 font-bold mt-0.5">Mencari...</p>
     </div>
-    <div class="bg-slate-900/50 p-2 rounded-2xl border border-slate-700/30">
-      <p class="text-[9px] font-bold text-slate-500 uppercase">Koneksi Update</p>
-      <p id="txtWaktu" class="text-xs text-emerald-400 font-bold mt-0.5 animate-pulse">Sinkronisasi...</p>
+    <div class="bg-slate-900/50 p-2 rounded-xl border border-slate-700/30">
+      <p class="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Pembaruan Terakhir</p>
+      <p id="txtWaktu" class="text-xs text-emerald-400 font-black mt-0.5">Sinkronisasi...</p>
     </div>
   </div>
 
@@ -56,25 +57,39 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Menangkap perubahan data dari Background Service HP pegawai secara langsung
+    // Variabel memori lokal untuk mengunci posisi peta dari kedipan konstan
+    let memoriLatitudeLama = 0;
+    let memoriLongitudeLama = 0;
+
     onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
       if (docSnap.exists() && docSnap.data().koordinatOwner) {
         const gps = docSnap.data().koordinatOwner;
         
-        // Update data teks
-        document.getElementById("txtKoordinat").innerText = `${parseFloat(gps.latitude).toFixed(4)}, ${parseFloat(gps.longitude).toFixed(4)}`;
+        const latBaru = parseFloat(gps.latitude);
+        const lngBaru = parseFloat(gps.longitude);
+
+        // 1. Update data info teks di bagian bawah layar
+        document.getElementById("txtKoordinat").innerText = `${latBaru.toFixed(4)}, ${lngBaru.toFixed(4)}`;
         document.getElementById("txtWaktu").innerText = new Date(parseInt(gps.waktuUpdate)).toLocaleTimeString('id-ID') + " WIB";
         
-        // REVISI LAYOUT PETA: Refresh isi iframe Google Maps murni di dalam layar agar titik bergeser live!
-        const urlPetaEmbed = `https://maps.google.com/maps?q=${gps.latitude},${gps.longitude}&z=16&output=embed`;
-        const iframe = document.getElementById("petaGoogleEmbedMandiri");
-        
-        if (iframe.src !== urlPetaEmbed) {
-          iframe.src = urlPetaEmbed;
+        // 2. REVISI LOGIKA ANTI BERKEDIP: Cek apakah koordinatnya benar-benar bergeser atau sama
+        if (latBaru !== memoriLatitudeLama || lngBaru !== memoriLongitudeLama) {
+          
+          // Simpan titik baru ke memori sistem lokal
+          memoriLatitudeLama = latBaru;
+          memoriLongitudeLama = lngBaru;
+
+          // Perbarui peta murni hanya jika titik posisi pegawai beneran berpindah meter!
+          const urlPetaEmbedBaru = `https://maps.google.com/maps?q=${latBaru},${lngBaru}&z=16&output=embed`;
+          document.getElementById("petaGoogleEmbedMandiri").src = urlPetaEmbedBaru;
+          console.log("📍 Pegawai bergerak! Peta di-refresh ke titik baru.");
+        } else {
+          console.log("💤 Pegawai diam ditempat. Peta dikunci agar tidak berkedip.");
         }
 
-        // Sembunyikan layar loading jika peta sudah siap
-        document.getElementById("loadingPeta").classList.add("hidden");
+        // Hilangkan layar loading hitam jika koneksi awal sudah terikat
+        const loadingOverlay = document.getElementById("loadingPeta");
+        if (loadingOverlay) loadingOverlay.classList.add("opacity-0", "pointer-events-none");
       }
     });
   </script>
