@@ -1,6 +1,6 @@
 {
-  "name": "Menu Digital Warung",
-  "short_name": "WarungMenu",
+  "name": "Warung Muchsin Assegaf",
+  "short_name": "Aplikasi warung muchsin",
   "description": "Sistem Pemesanan Kuliner Digital Real-time",
   "start_url": "/index.html",
   "display": "standalone",
