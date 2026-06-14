@@ -16,34 +16,41 @@
 
   <div class="text-center bg-slate-800/60 p-3 rounded-2xl border border-slate-700/50 flex-shrink-0">
     <div class="flex items-center justify-center gap-2">
-      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-      <h1 class="text-xs font-black tracking-widest text-emerald-400 uppercase">MONITORING LOKASI LIVE RESTORAN</h1>
+      <span id="lampuIndikator" class="w-2 h-2 rounded-full bg-red-500"></span>
+      <h1 class="text-xs font-black tracking-widest text-emerald-400 uppercase">SATELIT KONTROL OWNER</h1>
     </div>
   </div>
 
   <div class="bg-slate-800 rounded-3xl border border-slate-700 flex-1 w-full my-3 overflow-hidden shadow-2xl relative">
     <iframe id="petaGoogleEmbedMandiri" class="w-full h-full border-0 block" src="about:blank" allowfullscreen="" loading="lazy"></iframe>
     
-    <div id="loadingPeta" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center text-center p-4 transition-opacity duration-500">
-      <div class="w-7 h-7 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sinkronisasi Titik Satelit GPS...</p>
+    <div id="petaBloking" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center text-center p-4">
+      <div class="text-3xl mb-2">💤</div>
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest">RADAR NON-AKTIF (OFF)</p>
+      <p class="text-[10px] text-slate-500 mt-1">Pemancar GPS di HP pegawai dimatikan dari jauh</p>
     </div>
   </div>
 
-  <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 grid grid-cols-2 gap-3 text-center shadow-xl flex-shrink-0">
-    <div class="bg-slate-900/50 p-2 rounded-xl border border-slate-700/30">
-      <p class="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Koordinat Terkunci</p>
-      <p id="txtKoordinat" class="text-xs font-mono text-slate-200 font-bold mt-0.5">Mencari...</p>
+  <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 space-y-3 shadow-xl flex-shrink-0">
+    <div class="grid grid-cols-2 gap-3 text-center">
+      <div class="bg-slate-900/50 p-2 rounded-xl border border-slate-700/30">
+        <p class="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Koordinat</p>
+        <p id="txtKoordinat" class="text-xs font-mono text-slate-200 font-bold mt-0.5">Offline</p>
+      </div>
+      <div class="bg-slate-900/50 p-2 rounded-xl border border-slate-700/30">
+        <p class="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Terakhir Update</p>
+        <p id="txtWaktu" class="text-xs text-slate-400 font-bold mt-0.5">-</p>
+      </div>
     </div>
-    <div class="bg-slate-900/50 p-2 rounded-xl border border-slate-700/30">
-      <p class="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Pembaruan Terakhir</p>
-      <p id="txtWaktu" class="text-xs text-emerald-400 font-black mt-0.5">Sinkronisasi...</p>
-    </div>
+
+    <button id="btnSaklarMaster" onclick="toggleSaklarGpsJarakJauh()" class="w-full text-slate-950 bg-amber-400 hover:bg-amber-500 font-black py-3.5 rounded-xl text-xs uppercase tracking-widest shadow-md transition duration-200 active:scale-95">
+      📡 NYALAKAN PELACAKAN (ON)
+    </button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBlZTatONukCKARuviwEUCiDUMuT03nz3U",
@@ -57,41 +64,60 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Variabel memori lokal untuk mengunci posisi peta dari kedipan konstan
-    let memoriLatitudeLama = 0;
-    let memoriLongitudeLama = 0;
+    let statusSaklarGpsLive = false;
+    let latLama = 0, lngLama = 0;
 
+    // Mendengarkan perubahan data saklar & koordinat secara realtime
     onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().koordinatOwner) {
-        const gps = docSnap.data().koordinatOwner;
-        
-        const latBaru = parseFloat(gps.latitude);
-        const lngBaru = parseFloat(gps.longitude);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        statusSaklarGpsLive = data.saklarGpsLive === true;
 
-        // 1. Update data info teks di bagian bawah layar
-        document.getElementById("txtKoordinat").innerText = `${latBaru.toFixed(4)}, ${lngBaru.toFixed(4)}`;
-        document.getElementById("txtWaktu").innerText = new Date(parseInt(gps.waktuUpdate)).toLocaleTimeString('id-ID') + " WIB";
-        
-        // 2. REVISI LOGIKA ANTI BERKEDIP: Cek apakah koordinatnya benar-benar bergeser atau sama
-        if (latBaru !== memoriLatitudeLama || lngBaru !== memoriLongitudeLama) {
-          
-          // Simpan titik baru ke memori sistem lokal
-          memoriLatitudeLama = latBaru;
-          memoriLongitudeLama = lngBaru;
+        const btn = document.getElementById("btnSaklarMaster");
+        const bloking = document.getElementById("petaBloking");
+        const lampu = document.getElementById("lampuIndikator");
 
-          // Perbarui peta murni hanya jika titik posisi pegawai beneran berpindah meter!
-          const urlPetaEmbedBaru = `https://maps.google.com/maps?q=${latBaru},${lngBaru}&z=16&output=embed`;
-          document.getElementById("petaGoogleEmbedMandiri").src = urlPetaEmbedBaru;
-          console.log("📍 Pegawai bergerak! Peta di-refresh ke titik baru.");
+        if (statusSaklarGpsLive) {
+          // TAMPILAN JIKA RADAR ON
+          btn.className = "w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-widest shadow-md transition duration-200";
+          btn.innerText = "🛑 MATIKAN PELACAKAN (OFF)";
+          bloking.classList.add("hidden");
+          lampu.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+
+          if (data.koordinatOwner) {
+            const gps = data.koordinatOwner;
+            const latBaru = parseFloat(gps.latitude);
+            const lngBaru = parseFloat(gps.longitude);
+
+            document.getElementById("txtKoordinat").innerText = `${latBaru.toFixed(4)}, ${lngBaru.toFixed(4)}`;
+            document.getElementById("txtWaktu").innerText = new Date(parseInt(gps.waktuUpdate)).toLocaleTimeString('id-ID') + " WIB";
+
+            if (latBaru !== latLama || lngBaru !== lngLama) {
+              latLama = latBaru; lngLama = lngBaru;
+              document.getElementById("petaGoogleEmbedMandiri").src = `https://maps.google.com/maps?q=${latBaru},${lngBaru}&z=16&output=embed`;
+            }
+          }
         } else {
-          console.log("💤 Pegawai diam ditempat. Peta dikunci agar tidak berkedip.");
+          // TAMPILAN JIKA RADAR OFF
+          btn.className = "w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black py-3.5 rounded-xl text-xs uppercase tracking-widest shadow-md transition duration-200";
+          btn.innerText = "📡 NYALAKAN PELACAKAN (ON)";
+          bloking.classList.remove("hidden");
+          lampu.className = "w-2 h-2 rounded-full bg-red-500";
+          document.getElementById("petaGoogleEmbedMandiri").src = "about:blank";
+          document.getElementById("txtKoordinat").innerText = "Offline";
+          document.getElementById("txtWaktu").innerText = "Radar Mati";
         }
-
-        // Hilangkan layar loading hitam jika koneksi awal sudah terikat
-        const loadingOverlay = document.getElementById("loadingPeta");
-        if (loadingOverlay) loadingOverlay.classList.add("opacity-0", "pointer-events-none");
       }
     });
+
+    // Fungsi mengubah status saklar ke Firebase
+    window.toggleSaklarGpsJarakJauh = async () => {
+      try {
+        await setDoc(doc(db, "pengaturan", "profil"), {
+          saklarGpsLive: !statusSaklarGpsLive
+        }, { merge: true });
+      } catch (err) { console.error("Gagal mengubah saklar: " + err.message); }
+    };
   </script>
 </body>
 </html>
