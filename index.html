@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#4c0519">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="WarungMenu">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/562/562678.png">
   <title>Menu Digital Restoran</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4c0519">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WarungMenu">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/562/562678.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap" rel="stylesheet">
@@ -29,15 +29,30 @@
     <span id="txtPlangStatus">MEMUAT STATUS...</span>
   </div>
 
-  <div class="fixed bottom-6 right-4 z-40 flex items-center gap-2 drop-shadow-xl">
-    <span class="bg-white text-neutral-800 text-[11px] font-extrabold px-3 py-1.5 rounded-xl border border-neutral-100 shadow-sm select-none">
-      Tanya Admin
-    </span>
-    <button onclick="hubungiAdminLangsung()" class="bg-emerald-600 text-white p-3.5 rounded-full hover:bg-emerald-700 active:scale-95 transition-all duration-300 flex items-center justify-center border border-white/10" title="Hubungi Kami">
-      <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.66.986 3.288 1.481 5.362 1.483 5.405 0 9.805-4.4 9.808-9.81.002-2.622-1.01-5.087-2.854-6.935C17.062 2.04 14.604 1.026 12 1.026c-5.411 0-9.815 4.403-9.818 9.813-.001 2.083.5 3.731 1.492 5.395L2.68 21.366l5.22-.128s-.13.064-.253-.084zm13.111-7.794c-.207-.104-1.226-.605-1.416-.673-.19-.068-.328-.104-.466.104-.138.207-.535.673-.656.812-.12.138-.241.155-.448.052-.207-.104-.875-.323-1.666-1.027-.615-.548-1.03-1.226-1.15-1.433-.12-.207-.013-.319.091-.422.094-.093.207-.242.311-.363.104-.121.138-.207.207-.346.069-.138.034-.259-.017-.363-.052-.104-.466-1.122-.638-1.54-.168-.405-.333-.349-.466-.349-.121 0-.259-.008-.397-.008-.138 0-.363.052-.553.242-.19.19-.725.708-.725 1.727 0 1.02 1.484 2.005 1.691 2.28.207.276 2.921 4.461 7.078 6.257 1.012.433 1.78.692 2.387.884 1.016.321 1.941.276 2.673.167.814-.121 2.47-.673 2.815-1.329.345-.656.345-1.217.242-1.329-.104-.103-.241-.155-.448-.259z"/>
-      </svg>
-    </button>
+  <div class="fixed bottom-6 right-4 z-40 flex flex-col items-end gap-3 drop-shadow-xl">
+    
+    <div id="wrapperTombolInstalPWA" class="hidden flex items-center gap-2 animate-bounce">
+      <span class="bg-white text-neutral-800 text-[11px] font-extrabold px-3 py-1.5 rounded-xl border border-neutral-100 shadow-sm select-none">
+        Simpan Aplikasi
+      </span>
+      <button onclick="pemicuInstalasiAplikasiManual()" class="bg-amber-500 text-white p-3.5 rounded-full hover:bg-amber-600 active:scale-95 transition-all duration-300 flex items-center justify-center border border-white/10" title="Instal Aplikasi ke HP">
+        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm2 12v-5h-4v5h-3l5 5 5-5h-3z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <span class="bg-white text-neutral-800 text-[11px] font-extrabold px-3 py-1.5 rounded-xl border border-neutral-100 shadow-sm select-none">
+        Tanya Admin
+      </span>
+      <button onclick="hubungiAdminLangsung()" class="bg-emerald-600 text-white p-3.5 rounded-full hover:bg-emerald-700 active:scale-95 transition-all duration-300 flex items-center justify-center border border-white/10" title="Hubungi Kami">
+        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.66.986 3.288 1.481 5.362 1.483 5.405 0 9.805-4.4 9.808-9.81.002-2.622-1.01-5.087-2.854-6.935C17.062 2.04 14.604 1.026 12 1.026c-5.411 0-9.815 4.403-9.818 9.813-.001 2.083.5 3.731 1.492 5.395L2.68 21.366l5.22-.128s-.13.064-.253-.084zm13.111-7.794c-.207-.104-1.226-.605-1.416-.673-.19-.068-.328-.104-.466.104-.138.207-.535.673-.656.812-.12.138-.241.155-.448.052-.207-.104-.875-.323-1.666-1.027-.615-.548-1.03-1.226-1.15-1.433-.12-.207-.013-.319.091-.422.094-.093.207-.242.311-.363.104-.121.138-.207.207-.346.069-.138.034-.259-.017-.363-.052-.104-.466-1.122-.638-1.54-.168-.405-.333-.349-.466-.349-.121 0-.259-.008-.397-.008-.138 0-.363.052-.553.242-.19.19-.725.708-.725 1.727 0 1.02 1.484 2.005 1.691 2.28.207.276 2.921 4.461 7.078 6.257 1.012.433 1.78.692 2.387.884 1.016.321 1.941.276 2.673.167.814-.121 2.47-.673 2.815-1.329.345-.656.345-1.217.242-1.329-.104-.103-.241-.155-.448-.259z"/>
+        </svg>
+      </button>
+    </div>
+
   </div>
 
   <div class="bg-rose-950 text-white pt-16 pb-10 px-4 rounded-b-[2.5rem] shadow-lg text-center relative overflow-hidden w-full">
@@ -70,7 +85,6 @@
   </div>
 
   <div id="flyingCart" class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white p-5 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.12)] border-t border-neutral-100 z-50 transform translate-y-full transition-transform duration-300 max-h-[85vh] overflow-y-auto">
-    
     <div id="cartStage1" class="flex justify-between items-center gap-3">
       <div class="flex items-center gap-3">
         <button onclick="kosongkanKeranjangBelanja()" id="btnBersihkanCart" class="px-3 py-3 bg-red-50 text-red-600 font-bold rounded-xl text-xs hover:bg-red-100 transition shadow-sm">🗑️ Bersihkan</button>
@@ -87,26 +101,18 @@
         <h3 class="text-xs font-black text-neutral-800 uppercase tracking-wider">📋 Validasi & Alamat Kirim</h3>
         <button onclick="kembaliKeTahapSatu()" class="text-[10px] font-bold text-rose-800">⬅️ Kembali</button>
       </div>
-
       <div id="wrapperRingkasanNota" class="space-y-3 bg-neutral-50 p-3 rounded-2xl border text-xs max-h-[200px] overflow-y-auto"></div>
-
       <div class="space-y-2.5">
         <input type="text" id="pembeliNama" placeholder="Nama Lengkap Anda" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
         <textarea id="pembeliAlamat" placeholder="Alamat Rumah Lengkap / Patokan Alamat" class="w-full p-2.5 bg-neutral-50 border rounded-xl text-xs font-semibold outline-none focus:border-rose-950" rows="2"></textarea>
-        
         <div class="flex items-center gap-2 px-1 py-0.5">
           <input type="checkbox" id="checkSimpanAlamat" class="w-4 h-4 accent-rose-950 rounded cursor-pointer">
           <label for="checkSimpanAlamat" class="text-[11px] text-neutral-500 font-semibold cursor-pointer select-none">Simpan identitas saya untuk pesanan berikutnya</label>
         </div>
       </div>
-
-      <div class="flex gap-2 w-full">
-        <button onclick="salinNotaKeClipboardSistem()" class="flex-none px-5 bg-neutral-100 text-neutral-700 font-bold py-3.5 rounded-xl text-xs border hover:bg-neutral-200 transition shadow-sm flex items-center justify-center gap-1">
-          📋 Copy
-        </button>
-        <button onclick="kirimOrderKeWhatsApp()" id="btnKirimWA" class="flex-1 bg-emerald-600 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition flex items-center justify-center gap-1">
-          Kirim Pesanan ke WA 🚀
-        </button>
+      <div class="grid grid-cols-4 gap-2">
+        <button onclick="salinNotaKeClipboardSistem()" class="col-span-1 bg-neutral-100 text-neutral-700 font-bold py-3 rounded-xl text-xs border hover:bg-neutral-200 transition">📋 Copy</button>
+        <button onclick="kirimOrderKeWhatsApp()" id="btnKirimWA" class="col-span-3 bg-emerald-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-emerald-700 transition flex items-center justify-center gap-1">Kirim Pesanan ke WA 🚀</button>
       </div>
     </div>
   </div>
@@ -138,12 +144,48 @@
     let namaRestoranLive = "WARUNG MUCHSIN ASSEGAF";
     let nomorWaLive = "628985462249";
 
+    // VARIABEL UTAMA DETEKTOR INSTALASI PWA
+    let pemicuInstalasiBawaanBrowser = null;
+
     document.addEventListener("DOMContentLoaded", () => {
       const savedNama = localStorage.getItem("restoran_pembeli_nama");
       const savedAlamat = localStorage.getItem("restoran_pembeli_alamat");
       if(savedNama) document.getElementById("pembeliNama").value = savedNama;
       if(savedAlamat) document.getElementById("pembeliAlamat").value = savedAlamat;
       if(savedNama || savedAlamat) document.getElementById("checkSimpanAlamat").checked = true;
+    });
+
+    // LOGIKA PINTAR: Menangkap sinyal kesiapan instalasi dari browser Google Chrome / Edge
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Cegah pop-up bawaan browser agar tidak langsung mati otomatis saat layar disentuh luar
+      e.preventDefault();
+      // Simpan event ke memori lokal sistem
+      pemicuInstalasiBawaanBrowser = e;
+      // Munculkan tombol melayang "Simpan Aplikasi 📲" ke hadapan pelanggan
+      document.getElementById('wrapperTombolInstalPWA').classList.remove('hidden');
+    });
+
+    // Fungsi pemicu saat tombol kuning "Simpan Aplikasi" ditekan manual oleh pembeli
+    window.pemicuInstalasiAplikasiManual = () => {
+      if (pemicuInstalasiBawaanBrowser) {
+        // Pancing kembali jendela instalasi resmi keluar ke layar ruko
+        pemicuInstalasiBawaanBrowser.prompt();
+        // Cek jawaban keputusan dari si user pembeli
+        pemicuInstalasiBawaanBrowser.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User sukses mengunduh aplikasi PWA ruko.');
+            // Jika sukses terinstal, langsung sembunyikan tombol agar hemat ruang layar
+            document.getElementById('wrapperTombolInstalPWA').classList.add('hidden');
+          }
+          pemicuInstalasiBawaanBrowser = null;
+        });
+      }
+    };
+
+    // Detektor tambahan: Jika aplikasi sukses terpasang, langsung hilangkan tombol melayang
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('wrapperTombolInstalPWA').classList.add('hidden');
+      pemicuInstalasiBawaanBrowser = null;
     });
 
     onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
@@ -364,6 +406,11 @@
       }
     }
 
+    function susunTampilanNotaTahadDua() {
+      // fallback alias pencocokan jika ada perbedaan pemanggilan
+      susunTampilanNotaTahapDua();
+    }
+
     function susunTampilanNotaTahapDua() {
       const wrapper = document.getElementById("wrapperRingkasanNota");
       wrapper.innerHTML = `<h4 class="font-extrabold text-neutral-700 border-b pb-1 mb-2 uppercase text-[10px] tracking-wider">Detail Item & Catatan Rasa</h4>`;
@@ -495,7 +542,7 @@
         localStorage.setItem("restoran_pembeli_nama", nama);
         localStorage.setItem("restoran_pembeli_alamat", alamat);
       } else {
-        localStorage.removeItem("resto ran_pembeli_nama");
+        localStorage.removeItem("restoran_pembeli_nama");
         localStorage.removeItem("restoran_pembeli_alamat");
       }
 
