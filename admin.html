@@ -29,6 +29,7 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+    
     <div class="space-y-6 md:col-span-1">
       
       <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 overflow-hidden">
@@ -68,57 +69,58 @@
           <button id="btnTutupDarurat" onclick="toggleTutupDarurat()" class="w-full text-xs font-black py-3 rounded-xl uppercase shadow-sm transition"></button>
         </div>
       </div>
-    </div>
 
-    <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 md:col-span-2 overflow-hidden flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x">
-      <div class="p-5 flex-1 space-y-4 flex flex-col justify-center">
-        <div>
-          <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">🖨️ QR Code Alamat Web Resmi</h2>
-          <p class="text-[10px] text-neutral-400 mt-0.5">Generate barcode utama untuk dicetak di brosur, spanduk, atau stiker ruko</p>
-        </div>
-        <div>
-          <button onclick="buatQrCodeWebUtamaOtomatis()" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-[11px] font-black py-3 rounded-xl uppercase transition">
+      <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 overflow-hidden">
+        <button onclick="toggleDropdown('QrCode')" class="w-full p-5 flex justify-between items-center bg-white hover:bg-neutral-50/80 transition text-left outline-none">
+          <div>
+            <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">🖨️ QR Code Resmi</h2>
+            <p class="text-[10px] text-neutral-400 mt-0.5">Cetak barcode alamat website</p>
+          </div>
+          <span id="ikonPanahQrCode" class="text-xs font-bold text-neutral-400 transition-transform duration-300">▼</span>
+        </button>
+        <div id="kontenDropdownQrCode" class="hidden p-5 border-t border-neutral-100 bg-neutral-50/50 space-y-4">
+          <button onclick="buatQrCodeWebUtamaOtomatis()" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-black py-3 rounded-xl uppercase transition">
             ⚡ Buat QR Code Web Resto
           </button>
+          
+          <div id="areaCetakNotaQR" class="p-4 bg-white rounded-2xl border border-neutral-200/60 flex flex-col items-center justify-center text-center select-none shadow-sm">
+            <h3 id="labelNamaTokoQR" class="text-[10px] font-black text-rose-950 uppercase mb-2">WARUNG DIGITAL</h3>
+            <div id="boxContainerGpsQR" class="bg-white p-2 flex items-center justify-center">
+              <div id="qrcodeCanvasBox"></div>
+            </div>
+            <h4 id="labelNomorMejaQR" class="text-[9px] font-extrabold text-neutral-400 uppercase mt-2 tracking-widest">BELUM DI-GENERATE</h4>
+            <button id="btnCetakQR" onclick="window.print()" class="mt-3 w-full bg-rose-950 text-amber-400 font-extrabold text-[10px] py-2 rounded-xl uppercase tracking-wider shadow-sm hover:bg-rose-900 transition hidden">🖨️ Cetak Brosur QR</button>
+          </div>
         </div>
-        <p class="text-[9px] text-neutral-400 font-medium">Link QR akan otomatis mengunci alamat utama pembeli Anda tanpa nomor meja.</p>
       </div>
-      
-      <div id="areaCetakNotaQR" class="p-5 flex flex-col items-center justify-center bg-neutral-50/50 min-w-[200px] text-center select-none">
-        <h3 id="labelNamaTokoQR" class="text-[10px] font-black text-rose-950 uppercase mb-2">WARUNG DIGITAL</h3>
-        <div id="boxContainerGpsQR" class="bg-white p-3 rounded-2xl border shadow-sm flex items-center justify-center">
-          <div id="qrcodeCanvasBox"></div>
-        </div>
-        <h4 id="labelNomorMejaQR" class="text-[10px] font-extrabold text-neutral-500 uppercase mt-2 tracking-wider">PINDAI UNTUK MENU</h4>
-        <button id="btnCetakQR" onclick="window.print()" class="mt-3 bg-rose-950 text-amber-400 font-extrabold text-[9px] px-4 py-2 rounded-lg uppercase tracking-wider shadow-sm hover:bg-rose-900 transition hidden">🖨️ Cetak Brosur QR</button>
-      </div>
-    </div>
-  </div>
 
-  <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 overflow-hidden">
-    <button onclick="toggleDropdown('Menu')" class="w-full p-5 flex justify-between items-center bg-white hover:bg-neutral-50/80 transition text-left outline-none">
-      <div>
-        <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">🍲 Tambah Menu Baru</h2>
-        <p class="text-[10px] text-neutral-400 mt-0.5">Input data katalog kuliner</p>
-      </div>
-      <span id="ikonPanahMenu" class="text-xs font-bold text-neutral-400 transition-transform duration-300">▼</span>
-    </button>
-    <div id="kontenDropdownMenu" class="hidden p-5 border-t border-neutral-100 bg-neutral-50/50 space-y-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input type="text" id="menuNama" placeholder="Nama Menu" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
-        <select id="menuKategori" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold outline-none">
-          <option value="makanan">🍲 Makanan</option>
-          <option value="minuman">🍹 Minuman</option>
-          <option value="cemilan">🍿 Cemilan</option>
-        </select>
-        <input type="number" id="menuHarga" placeholder="Harga Normal (Rp)" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold">
-        <input type="number" id="menuHargaPromo" placeholder="Harga Promo (Rp)" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold">
-        <div class="sm:col-span-2">
-          <input type="file" id="menuFotoFile" accept="image/*" onchange="prosesDanKompresGambar(this, 'tambah')" class="w-full text-xs text-neutral-500 cursor-pointer">
-          <p id="statusKompresi" class="text-[10px] text-emerald-600 font-bold mt-1 hidden">✓ Foto siap!</p>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 md:col-span-2 overflow-hidden h-fit">
+      <button onclick="toggleDropdown('Menu')" class="w-full p-5 flex justify-between items-center bg-white hover:bg-neutral-50/80 transition text-left outline-none">
+        <div>
+          <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">🍲 Tambah Menu Baru</h2>
+          <p class="text-[10px] text-neutral-400 mt-0.5">Input data katalog kuliner</p>
         </div>
+        <span id="ikonPanahMenu" class="text-xs font-bold text-neutral-400 transition-transform duration-300">▼</span>
+      </button>
+      <div id="kontenDropdownMenu" class="hidden p-5 border-t border-neutral-100 bg-neutral-50/50 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input type="text" id="menuNama" placeholder="Nama Menu" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold outline-none focus:border-rose-950">
+          <select id="menuKategori" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold outline-none">
+            <option value="makanan">🍲 Makanan</option>
+            <option value="minuman">🍹 Minuman</option>
+            <option value="cemilan">🍿 Cemilan</option>
+          </select>
+          <input type="number" id="menuHarga" placeholder="Harga Normal (Rp)" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold">
+          <input type="number" id="menuHargaPromo" placeholder="Harga Promo (Rp)" class="w-full p-2.5 bg-white border rounded-xl text-xs font-semibold">
+          <div class="sm:col-span-2">
+            <input type="file" id="menuFotoFile" accept="image/*" onchange="prosesDanKompresGambar(this, 'tambah')" class="w-full text-xs text-neutral-500 cursor-pointer">
+            <p id="statusKompresi" class="text-[10px] text-emerald-600 font-bold mt-1 hidden">✓ Foto siap!</p>
+          </div>
+        </div>
+        <button onclick="unggahMenuBaru()" class="w-full bg-emerald-600 text-white text-xs font-black py-3 rounded-xl uppercase hover:bg-emerald-700">Publish Menu 🚀</button>
       </div>
-      <button onclick="unggahMenuBaru()" class="w-full bg-emerald-600 text-white text-xs font-black py-3 rounded-xl uppercase hover:bg-emerald-700">Publish Menu 🚀</button>
     </div>
   </div>
 
@@ -174,8 +176,8 @@
     window.toggleDropdown = (namaPanel) => {
       const konten = document.getElementById(`kontenDropdown${namaPanel}`);
       const ikon = document.getElementById(`ikonPanah${namaPanel}`);
-      konten.classList.toggle("hidden");
-      ikon.innerText = konten.classList.contains("hidden") ? "▼" : "▲";
+      if(konten) konten.classList.toggle("hidden");
+      if(ikon) ikon.innerText = konten.classList.contains("hidden") ? "▼" : "▲";
     };
 
     // LOGIKA AMBIL DATA PROFIL AWAL
@@ -192,7 +194,7 @@
       }
     });
 
-    // LOGIKA GENERATE QR CODE WEB UTAMA (BERSIH TANPA MEJA)
+    // LOGIKA GENERATE QR CODE WEB UTAMA
     window.buatQrCodeWebUtamaOtomatis = () => {
       const linkUtamaWebResto = "https://warungmuchsin.vercel.app/index.html";
       const boxCanvas = document.getElementById("qrcodeCanvasBox");
@@ -224,7 +226,6 @@
       }
     });
 
-    // PROSES SIMPAN PROFIL KESELURUHAN
     window.simpanProfilRestoran = async () => {
       const nama = document.getElementById("profilNama").value.trim();
       const whatsapp = document.getElementById("profilWA").value.trim();
@@ -237,7 +238,6 @@
       } catch (err) { alert(err.message); }
     };
 
-    // KIRIM MULTI POP-UP BARU
     window.kirimPopupMenumpukBaru = async () => {
       const teks = document.getElementById("profilPopupText").value.trim();
       if (!teks) { alert("Teks pop-up tidak boleh kosong!"); return; }
@@ -247,7 +247,6 @@
       } catch (err) { alert(err.message); }
     };
 
-    // SIMPAN OPERASIONAL JAM KERJA
     window.simpanJamOperasional = async () => {
       const jamBuka = parseInt(document.getElementById("inputJamBuka").value);
       const jamTutup = parseInt(document.getElementById("inputJamTutup").value);
@@ -257,7 +256,6 @@
       } catch (err) { alert(err.message); }
     };
 
-    // TOGGLE EMERGENCY DARURAT
     window.toggleTutupDarurat = async () => {
       try { await setDoc(doc(db, "pengaturan", "operasional"), { tutupDarurat: !currentTutupDarurat }, { merge: true }); } catch (err) { alert(err.message); }
     };
@@ -376,7 +374,7 @@
       const promoBaru = parseInt(document.getElementById(`editPromo-${id}`).value) || null;
       if (!namaBaru || !hargaBaru) return;
 
-      let dataUpdate = { nama: namaBaru, font: "bold", harga: hargaBaru, hargaPromo: promoBaru };
+      let dataUpdate = { nama: namaBaru, harga: hargaBaru, hargaPromo: promoBaru };
       if (tempEditGambar[id]) { dataUpdate.foto = tempEditGambar[id]; }
 
       try {
