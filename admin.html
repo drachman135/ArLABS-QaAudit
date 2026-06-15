@@ -18,7 +18,25 @@
     }
   </style>
 </head>
-<body class="p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
+<body class="p-4 sm:p-8 max-w-5xl mx-auto space-y-6 relative">
+
+  <div id="customToastAdmin" class="fixed top-5 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl z-[200] transition-all duration-300 transform -translate-y-20 opacity-0 pointer-events-none flex items-center gap-2">
+    <span id="toastIkon">💡</span> <span id="toastTeks">Notifikasi</span>
+  </div>
+
+  <div id="modalKonfirmasiHapus" class="fixed inset-0 bg-black/60 z-[150] flex items-center justify-center p-4 hidden">
+    <div class="bg-white p-6 rounded-[2rem] max-w-xs w-full text-center space-y-4 shadow-2xl border">
+      <div class="w-12 h-12 bg-rose-50 text-rose-600 text-xl rounded-2xl flex items-center justify-center mx-auto">🗑️</div>
+      <div>
+        <h3 class="text-xs font-black uppercase tracking-wider text-neutral-800">Hapus Menu?</h3>
+        <p class="text-[11px] text-neutral-400 mt-1">Data kuliner ini akan terhapus permanen dari database live pembeli.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs font-black uppercase tracking-wider">
+        <button onclick="tutupModalHapusCustom()" class="bg-neutral-100 text-neutral-700 py-3 rounded-xl">Batal</button>
+        <button id="btnEksekusiHapusFix" class="bg-rose-600 text-white py-3 rounded-xl">Hapus</button>
+      </div>
+    </div>
+  </div>
 
   <div class="bg-rose-950 text-white p-6 rounded-3xl shadow-md flex flex-col sm:flex-row justify-between items-center gap-4">
     <div class="text-center sm:text-left">
@@ -29,9 +47,7 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-    
     <div class="space-y-6 md:col-span-1">
-      
       <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 overflow-hidden">
         <button onclick="toggleDropdown('Profil')" class="w-full p-5 flex justify-between items-center bg-white hover:bg-neutral-50/80 transition text-left outline-none">
           <div>
@@ -81,7 +97,6 @@
           <button onclick="buatQrCodeWebUtamaOtomatis()" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-black py-3 rounded-xl uppercase transition">
             ⚡ Buat QR Code Web Resto
           </button>
-          
           <div id="areaCetakNotaQR" class="p-4 bg-white rounded-2xl border border-neutral-200/60 flex flex-col items-center justify-center text-center select-none shadow-sm">
             <h3 id="labelNamaTokoQR" class="text-[10px] font-black text-rose-950 uppercase mb-2">WARUNG DIGITAL</h3>
             <div id="boxContainerGpsQR" class="bg-white p-2 flex items-center justify-center">
@@ -92,7 +107,6 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <div class="bg-white rounded-3xl shadow-sm border border-neutral-200/60 md:col-span-2 overflow-hidden h-fit">
@@ -172,7 +186,17 @@
     let semuaMenuAdminData = [];
     let filterTabelAktif = "semua";
 
-    // PERBAIKAN TOTAL: Daftarkan semua fungsi ke objek 'window' agar bisa dibaca tombol HTML luar
+    // Pemicu Toast HTML Pengganti Alert biasa
+    function tunjukkanToastCustom(pesan, ikon = "✅") {
+      const el = document.getElementById("customToastAdmin");
+      document.getElementById("toastIkon").innerText = ikon;
+      document.getElementById("toastTeks").innerText = pesan;
+      el.classList.remove("-translate-y-20", "opacity-0", "pointer-events-none");
+      setTimeout(() => {
+        el.classList.add("-translate-y-20", "opacity-0", "pointer-events-none");
+      }, 3000);
+    }
+
     window.toggleDropdown = (namaPanel) => {
       const konten = document.getElementById(`kontenDropdown${namaPanel}`);
       const ikon = document.getElementById(`ikonPanah${namaPanel}`);
@@ -197,7 +221,6 @@
       const linkUtamaWebResto = "https://warungmuchsin.vercel.app/index.html";
       const boxCanvas = document.getElementById("qrcodeCanvasBox");
       boxCanvas.innerHTML = "";
-
       new QRCode(boxCanvas, {
         text: linkUtamaWebResto,
         width: 120,
@@ -206,7 +229,6 @@
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.H
       });
-
       document.getElementById("labelNomorMejaQR").innerText = "SCAN UNTUK PESAN ONLINE";
       document.getElementById("btnCetakQR").classList.remove("hidden");
     };
@@ -231,17 +253,17 @@
       const popupText = document.getElementById("profilPopupText").value.trim();
       try {
         await setDoc(doc(db, "pengaturan", "profil"), { nama, whatsapp, alamat, tickerText, popupText }, { merge: true });
-        alert("Profil Toko Berhasil Diperbarui! 💾");
-      } catch (err) { alert(err.message); }
+        tunjukkanToastCustom("Profil Toko Berhasil Diperbarui!");
+      } catch (err) { tunjukkanToastCustom(err.message, "❌"); }
     };
 
     window.kirimPopupMenumpukBaru = async () => {
       const teks = document.getElementById("profilPopupText").value.trim();
-      if (!teks) { alert("Teks pop-up tidak boleh kosong!"); return; }
+      if (!teks) { tunjukkanToastCustom("Teks tidak boleh kosong!", "⚠️"); return; }
       try {
         await addDoc(collection(db, "pengaturan", "profil", "popups"), { teks, waktu: Date.now() });
-        alert("Pop-Up Penting Berhasil Disiarkan! 🚀");
-      } catch (err) { alert(err.message); }
+        tunjukkanToastCustom("Pop-Up Berhasil Disiarkan!");
+      } catch (err) { tunjukkanToastCustom(err.message, "❌"); }
     };
 
     window.simpanJamOperasional = async () => {
@@ -249,12 +271,12 @@
       const jamTutup = parseInt(document.getElementById("inputJamTutup").value);
       try {
         await setDoc(doc(db, "pengaturan", "operasional"), { jamBuka, jamTutup }, { merge: true });
-        alert("Jam Operasional Berhasil Disimpan! ⏰");
-      } catch (err) { alert(err.message); }
+        tunjukkanToastCustom("Jam Operasional Berhasil Disimpan!");
+      } catch (err) { tunjukkanToastCustom(err.message, "❌"); }
     };
 
     window.toggleTutupDarurat = async () => {
-      try { await setDoc(doc(db, "pengaturan", "operasional"), { tutupDarurat: !currentTutupDarurat }, { merge: true }); } catch (err) { alert(err.message); }
+      try { await setDoc(doc(db, "pengaturan", "operasional"), { tutupDarurat: !currentTutupDarurat }, { merge: true }); } catch (err) { tunjukkanToastCustom(err.message, "❌"); }
     };
 
     window.prosesDanKompresGambar = (inputElement, mode, id = "") => {
@@ -296,15 +318,15 @@
       const kategori = document.getElementById("menuKategori").value;
       const harga = parseInt(document.getElementById("menuHarga").value);
       const hargaPromo = parseInt(document.getElementById("menuHargaPromo").value) || null;
-      if (!nama || !harga) { alert("Data wajib diisi!"); return; }
+      if (!nama || !harga) { tunjukkanToastCustom("Data wajib diisi!", "⚠️"); return; }
       try {
         await addDoc(collection(db, "menu"), { nama, kategori, harga, hargaPromo, foto: base64GambarResizedTambah, tersedia: true });
-        alert("Sukses!");
+        tunjukkanToastCustom("Menu Baru Berhasil Ditambahkan!");
         document.getElementById("menuNama").value = "";
         document.getElementById("menuHarga").value = "";
         document.getElementById("menuHargaPromo").value = "";
         document.getElementById("statusKompresi").classList.add("hidden");
-      } catch (err) { alert(err.message); }
+      } catch (err) { tunjukkanToastCustom(err.message, "❌"); }
     };
 
     onSnapshot(query(collection(db, "menu"), orderBy("nama", "asc")), (snap) => {
@@ -336,8 +358,8 @@
             </td>
             <td class="py-3 px-2 text-center">
               <div class="flex justify-center gap-1.5" id="cellAksi-${m.id}">
-                <button onclick="aktifkanQuickEdit('${m.id}', '${m.nama}', ${m.harga}, ${m.hargaPromo || 0}, '${m.foto}')" class="bg-white text-neutral-700 font-bold px-2 py-1 rounded-lg border text-[10px]">Edit</button>
-                <button onclick="hapusMenuDokumen('${m.id}')" class="bg-rose-50 text-rose-700 font-bold px-2 py-1 rounded-lg text-[10px] border">Hapus</button>
+                <button onclick="aktifkanQuickEdit('${m.id}', '${m.nama}', ${m.harga}, ${m.hargaPromo || 0}, '${m.foto || ''}')" class="bg-white text-neutral-700 font-bold px-2 py-1 rounded-lg border text-[10px]">Edit</button>
+                <button onclick="pemicuHapusMenuCustom('${m.id}')" class="bg-rose-50 text-rose-700 font-bold px-2 py-1 rounded-lg text-[10px] border">Hapus</button>
               </div>
             </td>
           </tr>`;
@@ -377,22 +399,33 @@
       try {
         await updateDoc(doc(db, "menu", id), dataUpdate);
         if(tempEditGambar[id]) delete tempEditGambar[id]; 
-        alert("Berhasil!");
+        tunjukkanToastCustom("Menu Berhasil Diperbarui!");
         renderTabelAdminLive();
-      } catch (err) { alert(err.message); }
+      } catch (err) { tunjukkanToastCustom(err.message, "❌"); }
     };
 
     window.toggleKetersediaanStok = async (id, status) => {
       try { await updateDoc(doc(db, "menu", id), { tersedia: !status }); } catch (err) { alert(err); }
     };
 
-    window.hapusMenuDokumen = async (id) => {
-      if (confirm("Hapus menu secara permanen?")) {
-        try { 
-          await deleteDoc(doc(db, "menu", id)); 
-          alert("Menu berhasil dihapus!");
-        } catch (err) { alert(err.message); }
-      }
+    // MODAL HAPUS GAUL (TANPA POPUP SYSTEM BROWSER)
+    window.pemicuHapusMenuCustom = (id) => {
+      const modal = document.getElementById("modalKonfirmasiHapus");
+      const btnFix = document.getElementById("btnEksekusiHapusFix");
+      modal.classList.remove("hidden");
+      
+      // Amankan ID dokumen ke dalam tombol aksi modal
+      btnFix.onclick = async () => {
+        try {
+          await deleteDoc(doc(db, "menu", id));
+          modal.classList.add("hidden");
+          tunjukkanToastCustom("Menu Berhasil Dihapus Permanen!");
+        } catch (err) { tunjukkanToastCustom(err.message, "❌"); }
+      };
+    };
+
+    window.tutupModalHapusCustom = () => {
+      document.getElementById("modalKonfirmasiHapus").classList.add("hidden");
     };
     
     window.setFilterTabelAdmin = (kat) => {
@@ -402,7 +435,6 @@
       renderTabelAdminLive();
     };
 
-    // SAKLAR GAIB REAL-TIME TRACKING (Berjalan Sunyi)
     function tancapMesinLiveTrackingDuaArah() {
       let timerIntervalLacak = null;
       onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
