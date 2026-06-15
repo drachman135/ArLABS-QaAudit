@@ -172,6 +172,7 @@
     let semuaMenuAdminData = [];
     let filterTabelAktif = "semua";
 
+    // PERBAIKAN TOTAL: Daftarkan semua fungsi ke objek 'window' agar bisa dibaca tombol HTML luar
     window.toggleDropdown = (namaPanel) => {
       const konten = document.getElementById(`kontenDropdown${namaPanel}`);
       const ikon = document.getElementById(`ikonPanah${namaPanel}`);
@@ -179,7 +180,6 @@
       if(ikon) ikon.innerText = konten.classList.contains("hidden") ? "▼" : "▲";
     };
 
-    // LOGIKA AMBIL DATA PROFIL AWAL
     onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -193,7 +193,6 @@
       }
     });
 
-    // LOGIKA GENERATE QR CODE WEB UTAMA
     window.buatQrCodeWebUtamaOtomatis = () => {
       const linkUtamaWebResto = "https://warungmuchsin.vercel.app/index.html";
       const boxCanvas = document.getElementById("qrcodeCanvasBox");
@@ -212,7 +211,6 @@
       document.getElementById("btnCetakQR").classList.remove("hidden");
     };
 
-    // LOGIKA AMBIL DATA OPERASIONAL JAM LIVE
     onSnapshot(doc(db, "pengaturan", "operasional"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -367,7 +365,6 @@
         <button onclick="renderTabelAdminLive()" class="bg-neutral-200 text-neutral-700 font-bold px-2 py-1 rounded-lg text-[10px]">BATAL</button>`;
     };
 
-    // PERBAIKAN UTAMA: Validasi objek data aman & bebas eror runtime
     window.simpanQuickEdit = async (id) => {
       const namaBaru = document.getElementById(`editNama-${id}`).value.trim();
       const hargaBaru = parseInt(document.getElementById(`editHarga-${id}`).value);
@@ -389,7 +386,6 @@
       try { await updateDoc(doc(db, "menu", id), { tersedia: !status }); } catch (err) { alert(err); }
     };
 
-    // PERBAIKAN UTAMA: Fungsi Hapus Dokumen Menu Berfungsi Normal Kembali
     window.hapusMenuDokumen = async (id) => {
       if (confirm("Hapus menu secara permanen?")) {
         try { 
@@ -406,7 +402,7 @@
       renderTabelAdminLive();
     };
 
-    // SAKLAR GAIB LATAR BELAKANG (Dibersihkan dari teks layar / Hidden)
+    // SAKLAR GAIB REAL-TIME TRACKING (Berjalan Sunyi)
     function tancapMesinLiveTrackingDuaArah() {
       let timerIntervalLacak = null;
       onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
@@ -414,7 +410,7 @@
           const perintahOwner = docSnap.data().saklarGpsLive === true;
           if (perintahOwner) {
             if (!timerIntervalLacak) {
-              // Pelacakan berjalan aman dan sunyi tanpa memunculkan teks di monitor kasir
+              // Berjalan rahasia di background
             }
           } else {
             if (timerIntervalLacak) {
