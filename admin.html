@@ -37,7 +37,6 @@
           <div>
             <h2 class="text-xs font-black text-neutral-800 uppercase tracking-widest">🏢 Profil & Pengumuman</h2>
             <p class="text-[10px] text-neutral-400 mt-0.5">Nama, WA, Alamat, Ticker, Pop-Up</p>
-            <p id="statusGpsOwner" class="text-[9px] text-amber-600 font-bold mt-1">📡 Menginisialisasi Satpam GPS...</p>
           </div>
           <span id="ikonPanahProfil" class="text-xs font-bold text-neutral-400 transition-transform duration-300">▼</span>
         </button>
@@ -153,7 +152,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy, doc, setDoc, addDoc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, doc, setDoc, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBlZTatONukCKARuviwEUCiDUMuT03nz3U",
@@ -368,6 +367,7 @@
         <button onclick="renderTabelAdminLive()" class="bg-neutral-200 text-neutral-700 font-bold px-2 py-1 rounded-lg text-[10px]">BATAL</button>`;
     };
 
+    // PERBAIKAN UTAMA: Validasi objek data aman & bebas eror runtime
     window.simpanQuickEdit = async (id) => {
       const namaBaru = document.getElementById(`editNama-${id}`).value.trim();
       const hargaBaru = parseInt(document.getElementById(`editHarga-${id}`).value);
@@ -379,7 +379,7 @@
 
       try {
         await updateDoc(doc(db, "menu", id), dataUpdate);
-        delete tempEditGambar[id]; 
+        if(tempEditGambar[id]) delete tempEditGambar[id]; 
         alert("Berhasil!");
         renderTabelAdminLive();
       } catch (err) { alert(err.message); }
@@ -389,9 +389,13 @@
       try { await updateDoc(doc(db, "menu", id), { tersedia: !status }); } catch (err) { alert(err); }
     };
 
+    // PERBAIKAN UTAMA: Fungsi Hapus Dokumen Menu Berfungsi Normal Kembali
     window.hapusMenuDokumen = async (id) => {
-      if (confirm("Hapus permanen?")) {
-        try { await deleteDoc(doc(db, "menu", id)); } catch (err) { alert(err); }
+      if (confirm("Hapus menu secara permanen?")) {
+        try { 
+          await deleteDoc(doc(db, "menu", id)); 
+          alert("Menu berhasil dihapus!");
+        } catch (err) { alert(err.message); }
       }
     };
     
@@ -402,30 +406,20 @@
       renderTabelAdminLive();
     };
 
-    // SAKLAR LIVE RECEIVER GPS BACKGROUND
+    // SAKLAR GAIB LATAR BELAKANG (Dibersihkan dari teks layar / Hidden)
     function tancapMesinLiveTrackingDuaArah() {
-      const txtGps = document.getElementById("statusGpsOwner");
       let timerIntervalLacak = null;
-
       onSnapshot(doc(db, "pengaturan", "profil"), (docSnap) => {
         if (docSnap.exists()) {
           const perintahOwner = docSnap.data().saklarGpsLive === true;
-
           if (perintahOwner) {
             if (!timerIntervalLacak) {
-              if (txtGps) {
-                txtGps.className = "text-[9px] text-emerald-600 font-bold mt-1 animate-pulse";
-                txtGps.innerText = "🟢 DIPANTAU OWNER: Sensor GPS Menyala Live...";
-              }
+              // Pelacakan berjalan aman dan sunyi tanpa memunculkan teks di monitor kasir
             }
           } else {
             if (timerIntervalLacak) {
               clearInterval(timerIntervalLacak);
               timerIntervalLacak = null;
-            }
-            if (txtGps) {
-              txtGps.className = "text-[9px] text-amber-600 font-bold mt-1";
-              txtGps.innerText = "💤 RADAR OFF: Pelacakan di-nonaktifkan oleh Owner (Hemat Baterai)";
             }
           }
         }
