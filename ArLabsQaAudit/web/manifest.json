@@ -1,12 +1,12 @@
 {
-    "name": "arlabs_qa_audit",
-    "short_name": "arlabs_qa_audit",
+    "name": "ArLabs QA Audit",
+    "short_name": "QA Audit",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#0F172A",
+    "theme_color": "#6366F1",
+    "description": "Professional QA Audit management tool for tracking projects, audits, and bugs.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {
