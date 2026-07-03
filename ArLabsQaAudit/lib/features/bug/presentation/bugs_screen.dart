@@ -116,7 +116,7 @@ class BugsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Bugs Registry',
+                      'Registri Bug',
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : const Color(0xFF0F172A),
@@ -125,7 +125,7 @@ class BugsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Track, manage, and resolve feature audit bugs.',
+                      'Lacak, kelola, dan selesaikan bug dari hasil audit.',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                       ),
@@ -135,7 +135,7 @@ class BugsScreen extends ConsumerWidget {
                 ElevatedButton.icon(
                   onPressed: () => context.push('/bugs/new'),
                   icon: const Icon(Icons.bug_report_rounded),
-                  label: const Text('Report Bug'),
+                  label: const Text('Laporkan Bug'),
                 ),
               ],
             ),
@@ -188,11 +188,11 @@ class BugsScreen extends ConsumerWidget {
                   if (filteredBugs.isEmpty) {
                     return EmptyState(
                       icon: Icons.bug_report_outlined,
-                      title: 'No Bugs Found',
+                      title: 'Tidak Ada Bug Ditemukan',
                       description: bugs.isEmpty
-                          ? 'No bugs have been reported in this workspace yet.'
-                          : 'No bugs match your active filter criteria.',
-                      actionLabel: bugs.isEmpty ? 'Report Bug' : null,
+                          ? 'Belum ada bug yang dilaporkan di ruang kerja ini.'
+                          : 'Tidak ada bug yang sesuai dengan filter aktif.',
+                      actionLabel: bugs.isEmpty ? 'Laporkan Bug' : null,
                       onActionPressed: bugs.isEmpty ? () => context.push('/bugs/new') : null,
                     );
                   }
@@ -209,7 +209,7 @@ class BugsScreen extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, st) => EmptyState(
                   icon: Icons.error_outline_rounded,
-                  title: 'Error loading bugs',
+                  title: 'Gagal memuat bug',
                   description: err.toString(),
                 ),
               ),
@@ -244,7 +244,7 @@ class BugsScreen extends ConsumerWidget {
             TextField(
               onChanged: (val) => ref.read(bugSearchProvider.notifier).state = val,
               decoration: const InputDecoration(
-                hintText: 'Search bugs by title, description, function, feature, project...',
+                hintText: 'Cari bug berdasarkan judul, deskripsi, fungsi, fitur, proyek...',
                 prefixIcon: Icon(Icons.search_rounded),
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -258,12 +258,12 @@ class BugsScreen extends ConsumerWidget {
               runSpacing: 12,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                _buildFilterLabel(context, Icons.filter_alt_outlined, 'Filters:'),
+                _buildFilterLabel(context, Icons.filter_alt_outlined, 'Filter:'),
                 
                 // Severity filter
                 _buildDropdown(
                   context: context,
-                  label: 'Severity',
+                  label: 'Keparahan',
                   value: sevFilter,
                   items: ['All', 'Critical', 'High', 'Medium', 'Low'],
                   onChanged: (val) => ref.read(bugSeverityFilterProvider.notifier).state = val!,
@@ -285,8 +285,8 @@ class BugsScreen extends ConsumerWidget {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF0F172A) : Colors.white,
-                        border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                        color: isDark ? const Color(0xFF080A0F) : Colors.white,
+                        border: Border.all(color: isDark ? const Color(0xFF1C2033) : const Color(0xFFE3E8F0)),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: DropdownButtonHideUnderline(
@@ -295,9 +295,9 @@ class BugsScreen extends ConsumerWidget {
                           isDense: true,
                           style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, fontSize: 11),
                           items: items.map((opt) {
-                            String name = 'Project: All';
+                            String name = 'Proyek: Semua';
                             if (opt != 'All') {
-                              name = 'Project: ${projects.firstWhere((p) => p.project.id == opt).project.name}';
+                              name = 'Proyek: ${projects.firstWhere((p) => p.project.id == opt).project.name}';
                             }
                             return DropdownMenuItem<String>(
                               value: opt,
@@ -313,12 +313,12 @@ class BugsScreen extends ConsumerWidget {
                   error: (_, __) => const SizedBox.shrink(),
                 ),
 
-                _buildFilterLabel(context, Icons.sort_rounded, 'Sort:'),
+                _buildFilterLabel(context, Icons.sort_rounded, 'Urutkan:'),
 
                 // Sort option
                 _buildDropdown(
                   context: context,
-                  label: 'Sort By',
+                  label: 'Urutkan',
                   value: sortBy,
                   items: ['Newest', 'Oldest', 'Severity', 'Status', 'Project', 'Title'],
                   onChanged: (val) => ref.read(bugSortProvider.notifier).state = val!,
@@ -370,7 +370,7 @@ class BugsScreen extends ConsumerWidget {
           items: items.map((opt) {
             return DropdownMenuItem<String>(
               value: opt,
-              child: Text(opt == 'All' ? '$label: All' : opt),
+              child: Text(opt == 'All' ? '$label: Semua' : opt),
             );
           }).toList(),
           onChanged: onChanged,
@@ -421,7 +421,7 @@ class BugsScreen extends ConsumerWidget {
                         ),
                         const Spacer(),
                         Text(
-                          'Last updated $lastUpdatedStr',
+                          'Diperbarui $lastUpdatedStr',
                           style: const TextStyle(fontSize: 10, color: Colors.grey),
                         ),
                       ],
@@ -482,7 +482,7 @@ class BugsScreen extends ConsumerWidget {
                         Icon(Icons.person_outline_rounded, size: 14, color: Colors.grey),
                         const SizedBox(width: 4),
                         Text(
-                          bug.assignedTo ?? 'Unassigned',
+                          bug.assignedTo ?? 'Tidak ditugaskan',
                           style: const TextStyle(fontSize: 11, color: Colors.grey),
                         ),
                       ],

@@ -51,19 +51,19 @@ class ProjectDialogs {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(isArchived ? 'Unarchive Project' : 'Archive Project'),
-        content: Text('Are you sure you want to ${isArchived ? 'unarchive' : 'archive'} "${project.name}"?'),
+        title: Text(isArchived ? 'Pulihkan Proyek' : 'Arsipkan Proyek'),
+        content: Text('Apakah Anda yakin ingin ${isArchived ? 'memulihkan' : 'mengarsipkan'} "${project.name}"?'),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Batal'),
           ),
           ElevatedButton(
             onPressed: () {
               ref.read(projectListProvider.notifier).archiveProject(project.id, !isArchived);
               Navigator.pop(context);
             },
-            child: Text(isArchived ? 'Unarchive' : 'Archive'),
+            child: Text(isArchived ? 'Pulihkan' : 'Arsipkan'),
           ),
         ],
       ),
@@ -74,12 +74,12 @@ class ProjectDialogs {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Project (Soft Delete)'),
-        content: Text('Are you sure you want to delete "${project.name}"? This project can be restored later.'),
+        title: const Text('Hapus Proyek'),
+        content: Text('Apakah Anda yakin ingin menghapus "${project.name}"? Proyek ini dapat dipulihkan kembali.'),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Batal'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
@@ -88,7 +88,7 @@ class ProjectDialogs {
               Navigator.pop(context);
               if (onDeleteSuccess != null) onDeleteSuccess();
             },
-            child: const Text('Delete'),
+            child: const Text('Hapus'),
           ),
         ],
       ),
@@ -123,7 +123,7 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: const Text('New Project'),
+      title: const Text('Proyek Baru'),
       content: SizedBox(
         width: 450,
         child: SingleChildScrollView(
@@ -136,12 +136,12 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Project Name',
-                    hintText: 'e.g., Mobile App Audit',
+                    labelText: 'Nama Proyek',
+                    hintText: 'mis. Audit Aplikasi Mobile',
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Project name is required';
+                      return 'Nama proyek wajib diisi';
                     }
                     return null;
                   },
@@ -151,12 +151,12 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
                   controller: _descController,
                   maxLines: 3,
                   decoration: const InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Describe this project...',
+                    labelText: 'Deskripsi',
+                    hintText: 'Deskripsikan proyek ini...',
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text('Accent Color', style: theme.textTheme.titleSmall),
+                Text('Warna Aksen', style: theme.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -185,7 +185,7 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
                   }).toList(),
                 ),
                 const SizedBox(height: 20),
-                Text('Project Icon', style: theme.textTheme.titleSmall),
+                Text('Ikon Proyek', style: theme.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -225,7 +225,7 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
       actions: [
         OutlinedButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: const Text('Batal'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -239,7 +239,7 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
               Navigator.pop(context);
             }
           },
-          child: const Text('Create'),
+          child: const Text('Buat'),
         ),
       ],
     );
@@ -284,7 +284,7 @@ class _EditProjectDialogState extends ConsumerState<_EditProjectDialog> {
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: const Text('Edit Project'),
+      title: const Text('Edit Proyek'),
       content: SizedBox(
         width: 450,
         child: SingleChildScrollView(
@@ -297,11 +297,11 @@ class _EditProjectDialogState extends ConsumerState<_EditProjectDialog> {
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Project Name',
+                    labelText: 'Nama Proyek',
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Project name is required';
+                      return 'Nama proyek wajib diisi';
                     }
                     return null;
                   },
@@ -311,11 +311,11 @@ class _EditProjectDialogState extends ConsumerState<_EditProjectDialog> {
                   controller: _descController,
                   maxLines: 3,
                   decoration: const InputDecoration(
-                    labelText: 'Description',
+                    labelText: 'Deskripsi',
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text('Accent Color', style: theme.textTheme.titleSmall),
+                Text('Warna Aksen', style: theme.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -344,7 +344,7 @@ class _EditProjectDialogState extends ConsumerState<_EditProjectDialog> {
                   }).toList(),
                 ),
                 const SizedBox(height: 20),
-                Text('Project Icon', style: theme.textTheme.titleSmall),
+                Text('Ikon Proyek', style: theme.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -384,7 +384,7 @@ class _EditProjectDialogState extends ConsumerState<_EditProjectDialog> {
       actions: [
         OutlinedButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: const Text('Batal'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -401,7 +401,7 @@ class _EditProjectDialogState extends ConsumerState<_EditProjectDialog> {
               Navigator.pop(context);
             }
           },
-          child: const Text('Save Changes'),
+          child: const Text('Simpan Perubahan'),
         ),
       ],
     );

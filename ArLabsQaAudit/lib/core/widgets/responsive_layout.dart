@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../theme/app_theme.dart';
 
 class ResponsiveLayout extends StatelessWidget {
   final Widget child;
@@ -11,240 +12,121 @@ class ResponsiveLayout extends StatelessWidget {
     required this.currentPath,
   });
 
+  static const _navItems = [
+    _NavDef(label: 'Beranda',       path: '/',         icon: Icons.home_outlined,         activeIcon: Icons.home_rounded),
+    _NavDef(label: 'Proyek',        path: '/projects', icon: Icons.folder_open_outlined,  activeIcon: Icons.folder_rounded),
+    _NavDef(label: 'Laporan Bug',   path: '/bugs',     icon: Icons.bug_report_outlined,   activeIcon: Icons.bug_report_rounded),
+    _NavDef(label: 'Pengaturan',    path: '/settings', icon: Icons.settings_outlined,     activeIcon: Icons.settings_rounded),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final isDesktop = width >= 800;
-
-    return Scaffold(
-      appBar: isDesktop
-          ? null
-          : AppBar(
-              title: const Text('QA Audit PWA'),
-              surfaceTintColor: Colors.transparent,
-              leading: Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu_rounded),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
-              ),
-            ),
-      drawer: isDesktop ? null : _buildDrawer(context),
-      body: isDesktop
-          ? Row(
-              children: [
-                _buildSidebar(context),
-                const VerticalDivider(width: 1, thickness: 1),
-                Expanded(child: child),
-              ],
-            )
-          : child,
-    );
-  }
-
-  Widget _buildSidebar(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      width: 250,
-      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Logo/App Name
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.fact_check_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'QA Audit PWA',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Sidebar menu items
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: ListView(
-                children: [
-                  _SidebarItem(
-                    icon: Icons.dashboard_outlined,
-                    activeIcon: Icons.dashboard_rounded,
-                    label: 'Dashboard',
-                    isActive: currentPath == '/' || currentPath.startsWith('/dashboard'),
-                    onTap: () => context.go('/'),
-                  ),
-                  const SizedBox(height: 4),
-                  _SidebarItem(
-                    icon: Icons.folder_open_outlined,
-                    activeIcon: Icons.folder_rounded,
-                    label: 'Projects',
-                    isActive: currentPath.startsWith('/projects'),
-                    onTap: () => context.go('/projects'),
-                  ),
-                  const SizedBox(height: 4),
-                  _SidebarItem(
-                    icon: Icons.bug_report_outlined,
-                    activeIcon: Icons.bug_report_rounded,
-                    label: 'Bugs',
-                    isActive: currentPath.startsWith('/bugs'),
-                    onTap: () => context.go('/bugs'),
-                  ),
-                  const SizedBox(height: 4),
-                  _SidebarItem(
-                    icon: Icons.settings_outlined,
-                    activeIcon: Icons.settings_rounded,
-                    label: 'Settings',
-                    isActive: currentPath.startsWith('/settings'),
-                    onTap: () => context.go('/settings'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Footer
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Text(
-              'v1.0.0 • Foundation',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawer(BuildContext context) {
-    return NavigationDrawer(
-      selectedIndex: _getSelectedIndex(currentPath),
-      onDestinationSelected: (index) {
-        // Close drawer first
-        Navigator.pop(context);
-        switch (index) {
-          case 0:
-            context.go('/');
-            break;
-          case 1:
-            context.go('/projects');
-            break;
-          case 2:
-            context.go('/bugs');
-            break;
-          case 3:
-            context.go('/settings');
-            break;
-        }
-      },
-      children: const [
-        Padding(
-          padding: EdgeInsets.fromLTRB(28, 20, 16, 10),
-          child: Text(
-            'QA Audit Menu',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-        ),
-        NavigationDrawerDestination(
-          icon: Icon(Icons.dashboard_outlined),
-          selectedIcon: Icon(Icons.dashboard_rounded),
-          label: Text('Dashboard'),
-        ),
-        NavigationDrawerDestination(
-          icon: Icon(Icons.folder_open_outlined),
-          selectedIcon: Icon(Icons.folder_rounded),
-          label: Text('Projects'),
-        ),
-        NavigationDrawerDestination(
-          icon: Icon(Icons.bug_report_outlined),
-          selectedIcon: Icon(Icons.bug_report_rounded),
-          label: Text('Bugs'),
-        ),
-        NavigationDrawerDestination(
-          icon: Icon(Icons.settings_outlined),
-          selectedIcon: Icon(Icons.settings_rounded),
-          label: Text('Settings'),
-        ),
-      ],
-    );
-  }
-
-  int _getSelectedIndex(String path) {
-    if (path.startsWith('/projects')) return 1;
-    if (path.startsWith('/bugs')) return 2;
-    if (path.startsWith('/settings')) return 3;
-    return 0; // Default to Dashboard
+    if (width >= 700) {
+      return _DesktopShell(child: child, currentPath: currentPath, navItems: _navItems);
+    } else {
+      return _MobileShell(child: child, currentPath: currentPath, navItems: _navItems);
+    }
   }
 }
 
-class _SidebarItem extends StatelessWidget {
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
+// ──────────────────────────────────────────────
+// DESKTOP SHELL — Top Navigation Bar
+// ──────────────────────────────────────────────
+class _DesktopShell extends StatelessWidget {
+  final Widget child;
+  final String currentPath;
+  final List<_NavDef> navItems;
 
-  const _SidebarItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.isActive,
-    required this.onTap,
+  const _DesktopShell({
+    required this.child,
+    required this.currentPath,
+    required this.navItems,
   });
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Column(
+        children: [
+          _TopNavBar(currentPath: currentPath, navItems: navItems),
+          Expanded(child: child),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopNavBar extends StatelessWidget {
+  final String currentPath;
+  final List<_NavDef> navItems;
+
+  const _TopNavBar({required this.currentPath, required this.navItems});
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final Color activeBgColor = theme.colorScheme.primary.withOpacity(isDark ? 0.12 : 0.08);
-    final Color activeTextColor = theme.colorScheme.primary;
-    final Color inactiveTextColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isActive ? activeBgColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+    return Container(
+      height: 54,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0A0C14) : Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? const Color(0xFF141826) : const Color(0xFFE3E8F0),
+            width: 1,
+          ),
         ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28.0),
         child: Row(
           children: [
-            Icon(
-              isActive ? activeIcon : icon,
-              color: isActive ? activeTextColor : inactiveTextColor,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                color: isActive ? activeTextColor : inactiveTextColor,
-                fontSize: 14,
+            // ── Logo / Brand ──
+            _BrandLogo(isDark: isDark, theme: theme),
+            const SizedBox(width: 40),
+
+            // ── Nav Items ──
+            ...navItems.map((item) {
+              final isActive = item.path == '/'
+                  ? currentPath == '/' || currentPath.isEmpty
+                  : currentPath.startsWith(item.path);
+              return _TopNavItem(
+                def: item,
+                isActive: isActive,
+                isDark: isDark,
+                theme: theme,
+              );
+            }),
+
+            const Spacer(),
+
+            // ── Version Badge ──
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF111826)
+                    : const Color(0xFFF0F4FF),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF1C2538)
+                      : const Color(0xFFCDD8F0),
+                ),
+              ),
+              child: Text(
+                'v1.3.0 · Phase 3',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
+                  color: isDark
+                      ? const Color(0xFF4A6080)
+                      : const Color(0xFF8099C0),
+                ),
               ),
             ),
           ],
@@ -252,4 +134,289 @@ class _SidebarItem extends StatelessWidget {
       ),
     );
   }
+}
+
+class _BrandLogo extends StatelessWidget {
+  final bool isDark;
+  final ThemeData theme;
+
+  const _BrandLogo({required this.isDark, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: const Icon(Icons.fact_check_rounded, color: Colors.white, size: 15),
+        ),
+        const SizedBox(width: 10),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'ArLabs ',
+                style: TextStyle(
+                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                  color: isDark ? Colors.white : const Color(0xFF0D1117),
+                ),
+              ),
+              TextSpan(
+                text: 'QA',
+                style: TextStyle(
+                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TopNavItem extends StatefulWidget {
+  final _NavDef def;
+  final bool isActive;
+  final bool isDark;
+  final ThemeData theme;
+
+  const _TopNavItem({
+    required this.def,
+    required this.isActive,
+    required this.isDark,
+    required this.theme,
+  });
+
+  @override
+  State<_TopNavItem> createState() => _TopNavItemState();
+}
+
+class _TopNavItemState extends State<_TopNavItem> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final activeColor = AppTheme.primaryColor;
+    final hoverColor  = widget.isDark ? const Color(0xFF1A2030) : const Color(0xFFF0F4FF);
+    final textColor = widget.isActive
+        ? activeColor
+        : _hovered
+            ? (widget.isDark ? Colors.white : const Color(0xFF0D1117))
+            : (widget.isDark ? const Color(0xFF6B7A99) : const Color(0xFF6B7280));
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit:  (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => context.go(widget.def.path),
+        child: Container(
+          height: 54,
+          margin: const EdgeInsets.only(right: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: _hovered && !widget.isActive ? hoverColor : Colors.transparent,
+            border: Border(
+              bottom: BorderSide(
+                color: widget.isActive ? activeColor : Colors.transparent,
+                width: 2,
+              ),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                widget.isActive ? widget.def.activeIcon : widget.def.icon,
+                size: 16,
+                color: textColor,
+              ),
+              const SizedBox(width: 7),
+              Text(
+                widget.def.label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: widget.isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: textColor,
+                  letterSpacing: -0.1,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+// MOBILE SHELL — AppBar + Drawer
+// ──────────────────────────────────────────────
+class _MobileShell extends StatelessWidget {
+  final Widget child;
+  final String currentPath;
+  final List<_NavDef> navItems;
+
+  const _MobileShell({
+    required this.child,
+    required this.currentPath,
+    required this.navItems,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: isDark ? const Color(0xFF0A0C14) : Colors.white,
+        surfaceTintColor: Colors.transparent,
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'ArLabs ',
+                style: TextStyle(
+                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : const Color(0xFF0D1117),
+                ),
+              ),
+              const TextSpan(
+                text: 'QA',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: Icon(
+              Icons.menu_rounded,
+              color: isDark ? Colors.white : const Color(0xFF0D1117),
+            ),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: isDark ? const Color(0xFF141826) : const Color(0xFFE3E8F0),
+          ),
+        ),
+      ),
+      drawer: _buildDrawer(context, isDark, theme),
+      body: child,
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context, bool isDark, ThemeData theme) {
+    return NavigationDrawer(
+      selectedIndex: _selectedIndex(currentPath),
+      onDestinationSelected: (index) {
+        Navigator.pop(context);
+        switch (index) {
+          case 0: context.go('/'); break;
+          case 1: context.go('/projects'); break;
+          case 2: context.go('/bugs'); break;
+          case 3: context.go('/settings'); break;
+        }
+      },
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 16, 16),
+          child: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'ArLabs ',
+                  style: TextStyle(
+                    fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : const Color(0xFF0D1117),
+                  ),
+                ),
+                const TextSpan(
+                  text: 'QA',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Divider(height: 1),
+        const SizedBox(height: 8),
+        ...navItems.map((item) => NavigationDrawerDestination(
+          icon: Icon(item.icon),
+          selectedIcon: Icon(item.activeIcon),
+          label: Text(item.label),
+        )),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            'v1.3.0 · Phase 3',
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark ? const Color(0xFF3A4255) : const Color(0xFFAAB3C5),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  int _selectedIndex(String path) {
+    if (path.startsWith('/projects')) return 1;
+    if (path.startsWith('/bugs'))     return 2;
+    if (path.startsWith('/settings')) return 3;
+    return 0;
+  }
+}
+
+// ──────────────────────────────────────────────
+// Navigation definition struct
+// ──────────────────────────────────────────────
+class _NavDef {
+  final String label;
+  final String path;
+  final IconData icon;
+  final IconData activeIcon;
+
+  const _NavDef({
+    required this.label,
+    required this.path,
+    required this.icon,
+    required this.activeIcon,
+  });
 }

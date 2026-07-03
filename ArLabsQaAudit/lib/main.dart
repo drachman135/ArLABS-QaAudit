@@ -5,10 +5,12 @@ import 'core/supabase/supabase_config.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 
+// Theme mode provider — dapat diubah dari halaman Pengaturan
+final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.dark);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase with configuration credentials
   await Supabase.initialize(
     url: SupabaseConfig.url,
     anonKey: SupabaseConfig.anonKey,
@@ -21,21 +23,20 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return MaterialApp.router(
-      title: 'QA Audit PWA',
+      title: 'ArLabs QA Audit',
       debugShowCheckedModeBanner: false,
-      
-      // Theme settings
-      themeMode: ThemeMode.dark, // Default to dark mode for a rich premium aesthetic
+
+      themeMode: themeMode,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
 
-      // Routing setup
       routerConfig: appRouter,
     );
   }

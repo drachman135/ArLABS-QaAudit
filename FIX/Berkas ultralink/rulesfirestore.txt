@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if the requesting user is an admin
+    function isAdmin() {
+      return request.auth != null && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin');
+    }
+
+    // User Profiles
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Feature Flags (Centralized Feature Manager)
+    match /featureFlags/{flagKey} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // User Links
+    match /links/{linkId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    
+    // Custom Blocks (Announcement block, FAQ, etc)
+    match /blocks/{blockId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    
+    // Link Groups
+    match /groups/{groupId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Analytics & Pro Tracking
+    match /analytics/{document=**} {
+      allow read, write: if true;
+    }
+
+    // System Settings (Maintenance Mode, etc.)
+    // Semua orang bisa baca (untuk cek status maintenance), hanya authenticated user yang bisa menulis
+    match /settings/{document} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}

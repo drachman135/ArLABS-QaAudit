@@ -136,10 +136,10 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
               children: [
                 const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
                 const SizedBox(width: 8),
-                Text('Audit updated for "${widget.functionName}" successfully.'),
+                Text('Audit untuk "${widget.functionName}" berhasil disimpan.'),
               ],
             ),
-            backgroundColor: const Color(0xFF10B981),
+            backgroundColor: const Color(0xFF16A34A),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -149,7 +149,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save audit: $e'),
+            content: Text('Gagal menyimpan audit: $e'),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           ),
@@ -172,7 +172,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Audit Entry Form'),
+        title: const Text('Formulir Audit'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.pop(),
@@ -236,19 +236,19 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
 
                     // Auditor Details Input Card
                     Text(
-                      'Auditor Profile',
+                      'Profil Auditor',
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _auditorController,
                       decoration: const InputDecoration(
-                        labelText: 'Auditor Name',
+                        labelText: 'Nama Auditor',
                         prefixIcon: Icon(Icons.person_outline_rounded),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Auditor name is required';
+                          return 'Nama auditor wajib diisi';
                         }
                         return null;
                       },
@@ -257,7 +257,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
 
                     // Status Dropdown
                     Text(
-                      'Audit Status',
+                      'Status Audit',
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
@@ -301,7 +301,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Priority Level',
+                          'Tingkat Prioritas',
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         if (_priority != null)
@@ -311,7 +311,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                                 _priority = null;
                               });
                             },
-                            child: const Text('Clear'),
+                            child: const Text('Hapus'),
                           ),
                       ],
                     ),
@@ -373,7 +373,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
 
                     // Notes (multi-line)
                     Text(
-                      'Audit Notes',
+                      'Catatan Audit',
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
@@ -382,7 +382,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                       maxLines: 6,
                       keyboardType: TextInputType.multiline,
                       decoration: const InputDecoration(
-                        hintText: 'Enter auditor findings, steps to reproduce, comments, or expected behavior findings...',
+                        hintText: 'Tulis temuan, langkah reproduksi, catatan, atau perilaku yang diharapkan...',
                         alignLabelWithHint: true,
                       ),
                     ),
@@ -397,7 +397,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                           ),
-                          child: const Text('Cancel'),
+                          child: const Text('Batal'),
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton(
@@ -411,7 +411,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : const Text('Save Audit'),
+                              : const Text('Simpan Audit'),
                         ),
                       ],
                     ),
@@ -425,7 +425,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Reported Bugs',
+                            'Bug yang Dilaporkan',
                             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           ElevatedButton.icon(
@@ -436,9 +436,9 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                               );
                             },
                             icon: const Icon(Icons.bug_report_rounded, size: 16),
-                            label: const Text('Report Bug'),
+                            label: const Text('Laporkan Bug'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFEF4444),
+                              backgroundColor: const Color(0xFFDC2626),
                               foregroundColor: Colors.white,
                             ),
                           ),
@@ -460,7 +460,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                                 padding: EdgeInsets.symmetric(vertical: 24.0),
                                 child: Center(
                                   child: Text(
-                                    'No bugs reported for this audit yet.',
+                                    'Belum ada bug yang dilaporkan untuk audit ini.',
                                     style: TextStyle(color: Colors.grey, fontSize: 13),
                                   ),
                                 ),
@@ -479,7 +479,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                                   dense: true,
                                   leading: const Icon(Icons.bug_report_rounded, color: Color(0xFFEF4444)),
                                   title: Text(bug.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  subtitle: Text('Severity: ${bug.severity} • Status: ${bug.status}', style: const TextStyle(fontSize: 11)),
+                                  subtitle: Text('Keparahan: ${bug.severity} • Status: ${bug.status}', style: const TextStyle(fontSize: 11)),
                                   trailing: const Icon(Icons.chevron_right_rounded, size: 16),
                                   onTap: () => context.push('/bugs/${bug.id}'),
                                 ),
@@ -509,7 +509,7 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Save the audit record first to report bugs for this function.',
+                                  'Simpan data audit terlebih dahulu untuk dapat melaporkan bug pada fungsi ini.',
                                   style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
                                 ),
                               ),

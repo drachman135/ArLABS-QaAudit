@@ -40,7 +40,7 @@ class ProjectsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Projects',
+                      'Daftar Proyek',
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : const Color(0xFF0F172A),
@@ -49,7 +49,7 @@ class ProjectsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Manage, search, and configure your QA workspaces.',
+                      'Kelola, cari, dan konfigurasi ruang kerja QA Anda.',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                       ),
@@ -59,7 +59,7 @@ class ProjectsScreen extends ConsumerWidget {
                 ElevatedButton.icon(
                   onPressed: () => ProjectDialogs.showCreateProject(context, ref),
                   icon: const Icon(Icons.add_rounded, size: 20),
-                  label: const Text('New Project'),
+                  label: const Text('Proyek Baru'),
                 ),
               ],
             ),
@@ -84,7 +84,7 @@ class ProjectsScreen extends ConsumerWidget {
                       initialValue: searchQuery,
                       onChanged: (val) => ref.read(projectSearchProvider.notifier).state = val.trim(),
                       decoration: InputDecoration(
-                        hintText: 'Search projects, modules, features, functions...',
+                        hintText: 'Cari proyek, modul, fitur, fungsi...',
                         prefixIcon: Icon(Icons.search_rounded, color: theme.colorScheme.primary.withOpacity(0.6)),
                         suffixIcon: searchQuery.isNotEmpty
                             ? IconButton(
@@ -113,11 +113,15 @@ class ProjectsScreen extends ConsumerWidget {
                     child: DropdownButton<String>(
                       value: sortType,
                       icon: const Icon(Icons.sort_rounded, size: 18),
-                      items: ['Name', 'Last Updated', 'Progress'].map((type) {
+                      items: [
+                        {'value': 'Name',         'label': 'Nama'},
+                        {'value': 'Last Updated', 'label': 'Diperbarui'},
+                        {'value': 'Progress',     'label': 'Progres'},
+                      ].map((type) {
                         return DropdownMenuItem<String>(
-                          value: type,
+                          value: type['value']!,
                           child: Text(
-                            'Sort: $type',
+                            'Urutkan: ${type['label']}',
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                           ),
                         );
@@ -136,12 +140,12 @@ class ProjectsScreen extends ConsumerWidget {
                   segments: const [
                     ButtonSegment(
                       value: 'Active',
-                      label: Text('Active'),
+                      label: Text('Aktif'),
                       icon: Icon(Icons.play_arrow_outlined, size: 16),
                     ),
                     ButtonSegment(
                       value: 'Archived',
-                      label: Text('Archived'),
+                      label: Text('Diarsipkan'),
                       icon: Icon(Icons.archive_outlined, size: 16),
                     ),
                   ],
@@ -184,18 +188,18 @@ class ProjectsScreen extends ConsumerWidget {
                     if (projects.isEmpty) {
                       return EmptyState(
                         icon: Icons.folder_open_outlined,
-                        title: 'No Projects Yet',
-                        description: 'Create a project to start planning modules and functions.',
-                        actionLabel: 'Create Project',
+                        title: 'Belum Ada Proyek',
+                        description: 'Buat proyek baru untuk mulai merencanakan modul dan fungsi.',
+                        actionLabel: 'Buat Proyek',
                         onActionPressed: () => ProjectDialogs.showCreateProject(context, ref),
                       );
                     }
 
                     return EmptyState(
                       icon: Icons.search_off_rounded,
-                      title: 'No Projects Found',
-                      description: 'No projects match your search criteria. Try a different keyword.',
-                      actionLabel: 'Clear Search',
+                      title: 'Proyek Tidak Ditemukan',
+                      description: 'Tidak ada proyek yang sesuai dengan pencarian Anda. Coba kata kunci lain.',
+                      actionLabel: 'Hapus Pencarian',
                       onActionPressed: () {
                         ref.read(projectSearchProvider.notifier).state = '';
                         ref.read(projectStatusFilterProvider.notifier).state = 'Active';
@@ -225,9 +229,9 @@ class ProjectsScreen extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, st) => EmptyState(
                   icon: Icons.error_outline_rounded,
-                  title: 'Connection Error',
-                  description: 'Failed to load projects from Supabase. Make sure your credentials are correct.',
-                  actionLabel: 'Retry',
+                  title: 'Gagal Memuat Data',
+                  description: 'Tidak dapat memuat proyek dari Supabase. Pastikan koneksi Anda aktif.',
+                  actionLabel: 'Coba Lagi',
                   onActionPressed: () => ref.read(projectListProvider.notifier).loadProjects(),
                 ),
               ),
@@ -285,7 +289,7 @@ class ProjectsScreen extends ConsumerWidget {
                           ),
                         ),
                         child: Text(
-                          project.status,
+                          isActive ? 'Aktif' : 'Diarsipkan',
                           style: TextStyle(
                             color: isActive ? const Color(0xFF10B981) : Colors.amber,
                             fontSize: 10,
@@ -305,7 +309,7 @@ class ProjectsScreen extends ConsumerWidget {
                             ProjectDialogs.showDeleteProject(context, ref, project);
                           }
                         },
-                        itemBuilder: (context) => [
+                         itemBuilder: (context) => [
                           const PopupMenuItem(
                             value: 'edit',
                             child: Row(
@@ -322,7 +326,7 @@ class ProjectsScreen extends ConsumerWidget {
                               children: [
                                 Icon(isActive ? Icons.archive_outlined : Icons.unarchive_outlined, size: 16),
                                 SizedBox(width: 8),
-                                Text(isActive ? 'Archive' : 'Unarchive'),
+                                Text(isActive ? 'Arsipkan' : 'Pulihkan'),
                               ],
                             ),
                           ),
@@ -332,7 +336,7 @@ class ProjectsScreen extends ConsumerWidget {
                               children: [
                                 Icon(Icons.delete_outline_rounded, color: theme.colorScheme.error, size: 16),
                                 const SizedBox(width: 8),
-                                const Text('Delete'),
+                                const Text('Hapus'),
                               ],
                             ),
                           ),
@@ -356,7 +360,7 @@ class ProjectsScreen extends ConsumerWidget {
               const SizedBox(height: 6),
               // Description
               Text(
-                project.description ?? 'No description provided.',
+                project.description ?? 'Tidak ada deskripsi.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                   height: 1.4,
@@ -371,7 +375,7 @@ class ProjectsScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Progress',
+                    'Progres',
                     style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, fontSize: 11),
                   ),
                   Text(
@@ -397,9 +401,9 @@ class ProjectsScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildStatItem(context, 'Total Funcs', stats.totalCount.toString()),
-                  _buildStatItem(context, 'Audited', stats.auditedCount.toString()),
-                  _buildStatItem(context, 'Not Tested', stats.notTestedCount.toString()),
+                  _buildStatItem(context, 'Total Fungsi', stats.totalCount.toString()),
+                  _buildStatItem(context, 'Diaudit', stats.auditedCount.toString()),
+                  _buildStatItem(context, 'Belum Diuji', stats.notTestedCount.toString()),
                 ],
               ),
 
@@ -411,7 +415,7 @@ class ProjectsScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Updated $lastUpdatedStr',
+                    'Diperbarui $lastUpdatedStr',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                       fontSize: 10,
