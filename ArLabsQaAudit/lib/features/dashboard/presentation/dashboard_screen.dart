@@ -569,17 +569,6 @@ class _CommandBar extends StatelessWidget {
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title group
-                Text(
-                  'Selamat Datang, Auditor',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
-                    color: isDark ? Colors.white : const Color(0xFF0D1117),
-                  ),
-                ),
-                const SizedBox(height: 4),
                 Text(
                   'Pantau kualitas, lacak bug, dan percepat pengujian Anda.',
                   style: theme.textTheme.bodyMedium?.copyWith(
