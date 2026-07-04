@@ -549,8 +549,14 @@ class _CommandBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 700;
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(32, 32, 32, 28),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 20 : 32,
+        vertical: isMobile ? 20 : 28,
+      ),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0A0C14) : Colors.white,
         border: Border(
@@ -559,20 +565,17 @@ class _CommandBar extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Title group
-          Expanded(
-            child: Column(
+      child: isMobile
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Title group
                 Text(
                   'Selamat Datang, Auditor',
                   style: theme.textTheme.titleLarge?.copyWith(
-                    fontSize: 22,
+                    fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: -0.6,
+                    letterSpacing: -0.5,
                     color: isDark ? Colors.white : const Color(0xFF0D1117),
                   ),
                 ),
@@ -583,47 +586,114 @@ class _CommandBar extends StatelessWidget {
                     color: isDark ? const Color(0xFF6B7A99) : const Color(0xFF6B7280),
                   ),
                 ),
+                const SizedBox(height: 16),
+                // Search bar & New project button in a row
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        onChanged: (val) =>
+                            ref.read(dashboardSearchQueryProvider.notifier).state = val,
+                        decoration: InputDecoration(
+                          hintText: 'Cari proyek, fungsi, atau bug...',
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: isDark ? const Color(0xFF4A5A70) : const Color(0xFFAAB3C5),
+                            size: 18,
+                          ),
+                          suffixIcon: searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.close_rounded, size: 16),
+                                  onPressed: () =>
+                                      ref.read(dashboardSearchQueryProvider.notifier).state = '',
+                                )
+                              : null,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Consumer(
+                      builder: (context, ref, _) => ElevatedButton(
+                        onPressed: () => ProjectDialogs.showCreateProject(context, ref),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          minimumSize: Size.zero,
+                        ),
+                        child: const Icon(Icons.add_rounded, size: 20),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Title group
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Selamat Datang, Auditor',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.6,
+                          color: isDark ? Colors.white : const Color(0xFF0D1117),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Pantau kualitas, lacak bug, dan percepat pengujian Anda.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: isDark ? const Color(0xFF6B7A99) : const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 24),
+                // Search bar
+                SizedBox(
+                  width: 320,
+                  child: TextField(
+                    onChanged: (val) =>
+                        ref.read(dashboardSearchQueryProvider.notifier).state = val,
+                    decoration: InputDecoration(
+                      hintText: 'Cari proyek, fungsi, atau bug...',
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: isDark ? const Color(0xFF4A5A70) : const Color(0xFFAAB3C5),
+                        size: 18,
+                      ),
+                      suffixIcon: searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.close_rounded, size: 16),
+                              onPressed: () =>
+                                  ref.read(dashboardSearchQueryProvider.notifier).state = '',
+                            )
+                          : null,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // New project button
+                Consumer(
+                  builder: (context, ref, _) => ElevatedButton.icon(
+                    onPressed: () => ProjectDialogs.showCreateProject(context, ref),
+                    icon: const Icon(Icons.add_rounded, size: 17),
+                    label: const Text('Proyek Baru'),
+                  ),
+                ),
               ],
             ),
-          ),
-          const SizedBox(width: 24),
-          // Search bar
-          SizedBox(
-            width: 320,
-            child: TextField(
-              onChanged: (val) =>
-                  ref.read(dashboardSearchQueryProvider.notifier).state = val,
-              decoration: InputDecoration(
-                hintText: 'Cari proyek, fungsi, atau bug...',
-                prefixIcon: Icon(
-                  Icons.search_rounded,
-                  color: isDark ? const Color(0xFF4A5A70) : const Color(0xFFAAB3C5),
-                  size: 18,
-                ),
-                suffixIcon: searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 16),
-                        onPressed: () =>
-                            ref.read(dashboardSearchQueryProvider.notifier).state = '',
-                      )
-                    : null,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                isDense: true,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          // New project button
-          Consumer(
-            builder: (context, ref, _) => ElevatedButton.icon(
-              onPressed: () => ProjectDialogs.showCreateProject(context, ref),
-              icon: const Icon(Icons.add_rounded, size: 17),
-              label: const Text('Proyek Baru'),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
