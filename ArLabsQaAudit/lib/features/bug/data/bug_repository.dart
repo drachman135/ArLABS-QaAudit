@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../domain/bug_model.dart';
 import '../../project/data/project_repository.dart';
+import '../../activity/data/activity_repository.dart';
 
 class BugRepository {
   final SupabaseClient _client;
@@ -156,6 +157,16 @@ class BugsListNotifier extends StateNotifier<AsyncValue<List<Bug>>> {
         state = AsyncValue.data([newBug, ...bugs]);
       });
 
+      // Log activity
+      ref.read(activityRepositoryProvider).logActivity(
+        projectId: newBug.projectId ?? '',
+        entityType: 'Bug',
+        entityId: newBug.id,
+        entityName: newBug.title,
+        action: 'Create',
+        description: 'Bug baru dilaporkan pada fungsi "${newBug.functionName}": ${newBug.title}',
+      );
+
       // Invalidate project stats
       ref.invalidate(projectListProvider);
     } catch (e, st) {
@@ -165,12 +176,42 @@ class BugsListNotifier extends StateNotifier<AsyncValue<List<Bug>>> {
 
   Future<void> editBug(Bug bug, WidgetRef ref) async {
     try {
+      final oldBug = state.value?.firstWhere((b) => b.id == bug.id);
       final updated = await _repository.updateBug(bug);
       state.whenData((bugs) {
         state = AsyncValue.data(
           bugs.map((b) => b.id == bug.id ? updated : b).toList(),
         );
       });
+
+      // Log activity
+      if (oldBug != null) {
+        final List<String> changes = [];
+        if (oldBug.status != updated.status) {
+          changes.add('status menjadi ${updated.status}');
+        }
+        if (oldBug.severity != updated.severity) {
+          changes.add('keparahan menjadi ${updated.severity}');
+        }
+        if (oldBug.title != updated.title) {
+          changes.add('judul diperbarui');
+        }
+        if (oldBug.description != updated.description) {
+          changes.add('deskripsi diperbarui');
+        }
+        final String desc = changes.isEmpty 
+            ? 'Detail Bug "${updated.title}" diperbarui'
+            : 'Bug "${updated.title}" diperbarui: ${changes.join(", ")}';
+
+        ref.read(activityRepositoryProvider).logActivity(
+          projectId: updated.projectId ?? '',
+          entityType: 'Bug',
+          entityId: updated.id,
+          entityName: updated.title,
+          action: oldBug.status != updated.status ? 'Change Status' : (oldBug.severity != updated.severity ? 'Change Severity' : 'Update'),
+          description: desc,
+        );
+      }
 
       // Invalidate project stats
       ref.invalidate(projectListProvider);
@@ -181,12 +222,25 @@ class BugsListNotifier extends StateNotifier<AsyncValue<List<Bug>>> {
 
   Future<void> softDelete(String id, WidgetRef ref) async {
     try {
+      final targetBug = state.value?.firstWhere((b) => b.id == id);
       await _repository.softDeleteBug(id);
       state.whenData((bugs) {
         state = AsyncValue.data(
           bugs.where((b) => b.id != id).toList(),
         );
       });
+
+      // Log activity
+      if (targetBug != null) {
+        ref.read(activityRepositoryProvider).logActivity(
+          projectId: targetBug.projectId ?? '',
+          entityType: 'Bug',
+          entityId: id,
+          entityName: targetBug.title,
+          action: 'Delete',
+          description: 'Bug "${targetBug.title}" dihapus (Soft Delete)',
+        );
+      }
 
       // Invalidate project stats
       ref.invalidate(projectListProvider);

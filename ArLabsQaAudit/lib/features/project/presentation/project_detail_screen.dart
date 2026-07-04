@@ -7,10 +7,15 @@ import '../../feature/domain/feature_model.dart';
 import '../../function/domain/function_model.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../audit/domain/audit_statistics.dart';
+import '../../activity/data/activity_repository.dart';
+import '../../activity/presentation/widgets/activity_timeline_widget.dart';
+import '../../activity/presentation/widgets/activity_filter_bar.dart';
 
 // StateProviders to track expanded nodes locally in the UI
 final expandedModulesProvider = StateProvider.family<Set<String>, String>((ref, projectId) => {});
 final expandedFeaturesProvider = StateProvider.family<Set<String>, String>((ref, projectId) => {});
+final projectDetailTabProvider = StateProvider.family<int, String>((ref, projectId) => 0); // 0 = Tree, 1 = Activity
+final projectActivityFiltersProvider = StateProvider.family<Map<String, dynamic>, String>((ref, projectId) => {'projectId': projectId});
 
 // Filter & Sort State Providers for this Project details tree
 final detailStatusFilterProvider = StateProvider.family<String, String>((ref, projectId) => 'All');
@@ -288,21 +293,90 @@ class ProjectDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // Filter & Sort Control Panel
-                _buildFilterAndSortPanel(context, ref),
+                // Tab Selection Bar
+                Consumer(
+                  builder: (context, ref, _) {
+                    final activeTab = ref.watch(projectDetailTabProvider(projectId));
+                    return Row(
+                      children: [
+                        _buildTabButton(context, 'Struktur Proyek', activeTab == 0, () {
+                          ref.read(projectDetailTabProvider(projectId).notifier).state = 0;
+                        }),
+                        const SizedBox(width: 8),
+                        _buildTabButton(context, 'Aktivitas', activeTab == 1, () {
+                          ref.read(projectDetailTabProvider(projectId).notifier).state = 1;
+                        }),
+                      ],
+                    );
+                  },
+                ),
                 const SizedBox(height: 24),
 
-                // Tree Hierarchy Section
+                // Filter & Sort Control Panel (only for Tab 0)
+                Consumer(
+                  builder: (context, ref, _) {
+                    final activeTab = ref.watch(projectDetailTabProvider(projectId));
+                    if (activeTab == 0) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFilterAndSortPanel(context, ref),
+                          const SizedBox(height: 24),
+                        ],
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+
+                // Tree Hierarchy / Activity Section
                 Expanded(
-                  child: processedModules.isEmpty
-                      ? EmptyState(
-                          icon: Icons.account_tree_outlined,
-                          title: 'No Items Found',
-                          description: 'No modules, features, or functions match your filters or are added yet.',
-                          actionLabel: 'Add Module',
-                          onActionPressed: () => _showAddModuleDialog(context, ref),
-                        )
-                      : _buildModulesList(context, ref, processedModules),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final activeTab = ref.watch(projectDetailTabProvider(projectId));
+                      if (activeTab == 1) {
+                        final filters = ref.watch(projectActivityFiltersProvider(projectId));
+                        final activitiesAsync = ref.watch(globalActivitiesProvider(filters));
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ActivityFilterBar(
+                              onChanged: ({entityType, action, dateRange}) {
+                                ref.read(projectActivityFiltersProvider(projectId).notifier).state = {
+                                  'projectId': projectId,
+                                  'entityType': entityType,
+                                  'action': action,
+                                  'startDate': dateRange?.start,
+                                  'endDate': dateRange?.end,
+                                };
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            Expanded(
+                              child: activitiesAsync.when(
+                                data: (activities) {
+                                  return ActivityTimelineWidget(activities: activities);
+                                },
+                                loading: () => const Center(child: CircularProgressIndicator()),
+                                error: (err, _) => Center(child: Text('Error loading activity: $err')),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      // Tab 0: Tree Hierarchy
+                      return processedModules.isEmpty
+                          ? EmptyState(
+                              icon: Icons.account_tree_outlined,
+                              title: 'No Items Found',
+                              description: 'No modules, features, or functions match your filters or are added yet.',
+                              actionLabel: 'Add Module',
+                              onActionPressed: () => _showAddModuleDialog(context, ref),
+                            )
+                          : _buildModulesList(context, ref, processedModules);
+                    },
+                  ),
                 ),
               ],
             ),
@@ -315,6 +389,39 @@ class ProjectDetailScreen extends ConsumerWidget {
           description: err.toString(),
           actionLabel: 'Retry',
           onActionPressed: () => ref.read(projectTreeProvider(projectId).notifier).loadTree(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(BuildContext context, String text, bool isActive, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive 
+              ? theme.colorScheme.primary.withOpacity(0.1) 
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive 
+                ? theme.colorScheme.primary 
+                : (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
+            width: 1,
+          ),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            color: isActive ? theme.colorScheme.primary : (isDark ? Colors.grey : Colors.black87),
+            fontSize: 13,
+          ),
         ),
       ),
     );

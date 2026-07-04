@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../domain/bug_model.dart';
 import '../data/bug_repository.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../attachment/presentation/widgets/attachment_section_widget.dart';
 
 class BugDetailScreen extends ConsumerWidget {
   final String bugId;
@@ -225,6 +226,14 @@ class BugDetailScreen extends ConsumerWidget {
                     if (bug.actualResult != null && bug.actualResult!.isNotEmpty)
                       Expanded(child: _buildDetailCard(context, 'Actual Result', bug.actualResult!)),
                   ],
+                ),
+                const SizedBox(height: 32),
+
+                // Attachments Section
+                AttachmentSectionWidget(
+                  bugId: bug.id,
+                  projectId: bug.projectId ?? '',
+                  parentName: bug.title,
                 ),
                 const SizedBox(height: 32),
 

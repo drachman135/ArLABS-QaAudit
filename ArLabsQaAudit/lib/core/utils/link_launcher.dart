@@ -1,0 +1,1 @@
+export 'link_launcher_stub.dart' if (dart.library.html) 'link_launcher_web.dart';

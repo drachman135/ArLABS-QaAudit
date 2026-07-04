@@ -8,13 +8,23 @@ import '../../project/presentation/widgets/project_dialogs.dart';
 import '../../audit/data/audit_repository.dart';
 import '../../bug/domain/bug_model.dart';
 import '../../bug/data/bug_repository.dart';
-import '../../../core/widgets/empty_state.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../activity/data/activity_repository.dart';
+import '../../activity/domain/activity_model.dart';
+import '../../activity/presentation/widgets/activity_timeline_widget.dart';
+import '../../activity/presentation/widgets/activity_filter_bar.dart';
 
 final recentAuditsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final repository = ref.watch(auditRepositoryProvider);
   return repository.getRecentAudits();
 });
+
+final recentActivitiesProvider = FutureProvider<List<Activity>>((ref) async {
+  final repository = ref.watch(activityRepositoryProvider);
+  return repository.getActivities();
+});
+
+final dashboardActivityFiltersProvider = StateProvider<Map<String, dynamic>>((ref) => {});
 
 final dashboardSearchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -52,6 +62,7 @@ class DashboardScreen extends ConsumerWidget {
     final projectsAsync = ref.watch(projectListProvider);
     final bugsAsync = ref.watch(bugsListProvider);
     final searchQuery = ref.watch(dashboardSearchQueryProvider);
+    final activitiesAsync = ref.watch(recentActivitiesProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -73,7 +84,11 @@ class DashboardScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
                 child: projectsAsync.when(
                   data: (projects) => bugsAsync.when(
-                    data: (bugs) => _buildSearchResults(context, searchQuery, projects, bugs),
+                    data: (bugs) => activitiesAsync.when(
+                      data: (activities) => _buildSearchResults(context, searchQuery, projects, bugs, activities),
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => const SizedBox.shrink(),
+                    ),
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (e, _) => const SizedBox.shrink(),
                   ),
@@ -318,26 +333,54 @@ class DashboardScreen extends ConsumerWidget {
   // Recent Activity
   // ──────────────────────────────────────────────────────────────────────────
   Widget _buildRecentActivityList(BuildContext context, WidgetRef ref, bool isDark, ThemeData theme) {
-    final activityAsync = ref.watch(recentAuditsProvider);
-    return activityAsync.when(
-      data: (activities) {
-        if (activities.isEmpty) {
-          return _EmptyBox(
-            icon: Icons.history_rounded,
-            label: 'Belum ada aktivitas audit.',
-            action: null,
-            onAction: null,
-            isDark: isDark,
-          );
-        }
-        return _ActivityPanel(
-          activities: activities,
-          isDark: isDark,
-          theme: theme,
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const SizedBox.shrink(),
+    final filters = ref.watch(dashboardActivityFiltersProvider);
+    final activityAsync = ref.watch(globalActivitiesProvider(filters));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ActivityFilterBar(
+          onChanged: ({entityType, action, dateRange}) {
+            ref.read(dashboardActivityFiltersProvider.notifier).state = {
+              'projectId': 'All',
+              'entityType': entityType,
+              'action': action,
+              'startDate': dateRange?.start,
+              'endDate': dateRange?.end,
+            };
+          },
+        ),
+        const SizedBox(height: 12),
+        activityAsync.when(
+          data: (activities) {
+            if (activities.isEmpty) {
+              return _EmptyBox(
+                icon: Icons.history_rounded,
+                label: 'Belum ada aktivitas tercatat yang sesuai filter.',
+                action: null,
+                onAction: null,
+                isDark: isDark,
+              );
+            }
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF0D0F16) : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF1C2033) : const Color(0xFFE3E8F0),
+                ),
+              ),
+              child: ActivityTimelineWidget(
+                activities: activities.take(8).toList(),
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+              ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, __) => const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 
@@ -382,6 +425,7 @@ class DashboardScreen extends ConsumerWidget {
     String query,
     List<ProjectWithStats> projects,
     List<Bug> bugs,
+    List<Activity> activities,
   ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -391,6 +435,7 @@ class DashboardScreen extends ConsumerWidget {
     final List<Map<String, dynamic>> moduleMatches = [];
     final List<Map<String, dynamic>> featureMatches = [];
     final List<Map<String, dynamic>> functionMatches = [];
+    final List<Activity> activityMatches = [];
 
     for (final p in projects) {
       if (p.project.name.toLowerCase().contains(term) ||
@@ -427,8 +472,16 @@ class DashboardScreen extends ConsumerWidget {
             b.description.toLowerCase().contains(term))
         .toList();
 
+    for (final act in activities) {
+      if (act.description.toLowerCase().contains(term) ||
+          act.entityName.toLowerCase().contains(term) ||
+          act.action.toLowerCase().contains(term)) {
+        activityMatches.add(act);
+      }
+    }
+
     final total = projectMatches.length + moduleMatches.length +
-        featureMatches.length + functionMatches.length + bugMatches.length;
+        featureMatches.length + functionMatches.length + bugMatches.length + activityMatches.length;
 
     final borderColor = isDark ? const Color(0xFF1C2033) : const Color(0xFFE3E8F0);
     final bgColor = isDark ? const Color(0xFF0D0F16) : Colors.white;
@@ -522,6 +575,17 @@ class DashboardScreen extends ConsumerWidget {
                   subtitle: null,
                   isDark: isDark,
                   onTap: () => context.go('/projects/${fn['projectId']}'),
+                )),
+          ],
+          if (activityMatches.isNotEmpty) ...[
+            _SearchCategory(label: 'AKTIVITAS', isDark: isDark),
+            ...activityMatches.map((act) => _SearchRow(
+                  icon: Icons.history_rounded,
+                  color: const Color(0xFF0EA5E9),
+                  label: act.description,
+                  subtitle: '${act.entityType} • ${act.entityName}',
+                  isDark: isDark,
+                  onTap: () => context.go('/projects/${act.projectId}'),
                 )),
           ],
         ],
@@ -920,121 +984,6 @@ class _ProjectRowState extends State<_ProjectRow> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ActivityPanel extends StatelessWidget {
-  final List<Map<String, dynamic>> activities;
-  final bool isDark;
-  final ThemeData theme;
-
-  const _ActivityPanel({
-    required this.activities,
-    required this.isDark,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0D0F16) : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isDark ? const Color(0xFF1C2033) : const Color(0xFFE3E8F0),
-        ),
-      ),
-      child: Column(
-        children: activities.take(8).map((act) {
-          final status       = act['status'] as String? ?? 'Not Tested';
-          final function     = act['functions'] as Map<String, dynamic>?;
-          final funcName     = function?['name'] as String? ?? 'Fungsi';
-          final feature      = function?['features'] as Map<String, dynamic>?;
-          final featName     = feature?['name'] as String? ?? 'Fitur';
-          final module       = feature?['modules'] as Map<String, dynamic>?;
-          final modName      = module?['name'] as String? ?? 'Modul';
-          final project      = module?['projects'] as Map<String, dynamic>?;
-          final projectName  = project?['name'] as String? ?? 'Proyek';
-          final auditor      = act['auditor_name'] as String? ?? 'Auditor';
-          final lastAudited  = DateTime.tryParse(act['last_audited_at'] as String? ?? '') ?? DateTime.now();
-          final dateStr      = '${lastAudited.day}/${lastAudited.month}/${lastAudited.year}';
-          final color        = _statusColor(status);
-          final label        = _statusLabel(status);
-          final isLast       = act == activities.take(8).last;
-
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              border: !isLast
-                  ? Border(
-                      bottom: BorderSide(
-                        color: isDark ? const Color(0xFF141826) : const Color(0xFFEEF2F8),
-                      ),
-                    )
-                  : null,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '$projectName · $modName · $featName · $funcName',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : const Color(0xFF0D1117),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Oleh $auditor · $dateStr',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isDark
-                              ? const Color(0xFF6B7A99)
-                              : const Color(0xFF6B7280),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: color.withValues(alpha: 0.2)),
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
       ),
     );
   }

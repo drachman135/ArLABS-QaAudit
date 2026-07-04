@@ -4,6 +4,7 @@ import '../../../core/supabase/supabase_config.dart';
 import '../domain/project_model.dart';
 import '../../function/domain/function_model.dart';
 import '../../audit/domain/audit_statistics.dart';
+import '../../activity/data/activity_repository.dart';
 
 class ProjectRepository {
   final SupabaseClient _client;
@@ -116,10 +117,12 @@ final projectRepositoryProvider = Provider<ProjectRepository>((ref) {
 });
 
 // StateNotifier for Managing Projects List
+// StateNotifier for Managing Projects List
 class ProjectListNotifier extends StateNotifier<AsyncValue<List<ProjectWithStats>>> {
   final ProjectRepository _repository;
+  final Ref _ref;
 
-  ProjectListNotifier(this._repository) : super(const AsyncValue.loading()) {
+  ProjectListNotifier(this._repository, this._ref) : super(const AsyncValue.loading()) {
     loadProjects();
   }
 
@@ -152,6 +155,15 @@ class ProjectListNotifier extends StateNotifier<AsyncValue<List<ProjectWithStats
           ...projects,
         ]);
       });
+      // Log activity
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: newProject.id,
+        entityType: 'Project',
+        entityId: newProject.id,
+        entityName: newProject.name,
+        action: 'Create',
+        description: 'Proyek "${newProject.name}" berhasil dibuat',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -170,6 +182,15 @@ class ProjectListNotifier extends StateNotifier<AsyncValue<List<ProjectWithStats
           }).toList(),
         );
       });
+      // Log activity
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: project.id,
+        entityType: 'Project',
+        entityId: project.id,
+        entityName: project.name,
+        action: 'Update',
+        description: 'Informasi proyek "${project.name}" diperbarui',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -188,6 +209,17 @@ class ProjectListNotifier extends StateNotifier<AsyncValue<List<ProjectWithStats
           }).toList(),
         );
       });
+      // Log activity
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: id,
+        entityType: 'Project',
+        entityId: id,
+        entityName: updatedProject.name,
+        action: archive ? 'Archive' : 'Restore',
+        description: archive 
+            ? 'Proyek "${updatedProject.name}" diarsipkan' 
+            : 'Proyek "${updatedProject.name}" dipulihkan dari arsip',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -195,10 +227,20 @@ class ProjectListNotifier extends StateNotifier<AsyncValue<List<ProjectWithStats
 
   Future<void> softDelete(String id) async {
     try {
+      final name = state.value?.firstWhere((p) => p.project.id == id).project.name ?? 'Proyek';
       await _repository.softDeleteProject(id);
       state.whenData((projects) {
         state = AsyncValue.data(projects.where((p) => p.project.id != id).toList());
       });
+      // Log activity
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: id,
+        entityType: 'Project',
+        entityId: id,
+        entityName: name,
+        action: 'Delete',
+        description: 'Proyek "$name" dihapus (Soft Delete)',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -208,5 +250,5 @@ class ProjectListNotifier extends StateNotifier<AsyncValue<List<ProjectWithStats
 final projectListProvider =
     StateNotifierProvider<ProjectListNotifier, AsyncValue<List<ProjectWithStats>>>((ref) {
   final repository = ref.watch(projectRepositoryProvider);
-  return ProjectListNotifier(repository);
+  return ProjectListNotifier(repository, ref);
 });

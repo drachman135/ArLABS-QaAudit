@@ -125,3 +125,38 @@ CREATE TRIGGER update_bugs_updated_at
   BEFORE UPDATE ON bugs
   FOR EACH ROW
   EXECUTE PROCEDURE update_updated_at_column();
+
+-- 7. Attachments Table
+CREATE TABLE IF NOT EXISTS attachments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  audit_id UUID REFERENCES audits(id) ON DELETE CASCADE,
+  bug_id UUID REFERENCES bugs(id) ON DELETE CASCADE,
+  file_name TEXT NOT NULL,
+  original_file_name TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  mime_type TEXT NOT NULL,
+  storage_path TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT chk_attachment_target CHECK (
+    (audit_id IS NOT NULL AND bug_id IS NULL) OR 
+    (audit_id IS NULL AND bug_id IS NOT NULL)
+  )
+);
+
+CREATE INDEX IF NOT EXISTS idx_attachments_audit_id ON attachments(audit_id);
+CREATE INDEX IF NOT EXISTS idx_attachments_bug_id ON attachments(bug_id);
+
+-- 8. Activities Table
+CREATE TABLE IF NOT EXISTS activities (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+  entity_type TEXT NOT NULL, -- Project, Module, Feature, Function, Audit, Bug, Attachment
+  entity_id UUID NOT NULL,
+  entity_name TEXT NOT NULL,
+  action TEXT NOT NULL,
+  description TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_activities_project_id ON activities(project_id);
+CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at DESC);

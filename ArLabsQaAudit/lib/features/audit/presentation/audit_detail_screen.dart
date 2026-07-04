@@ -7,6 +7,8 @@ import '../../project/data/project_tree_provider.dart';
 import '../../project/data/project_repository.dart';
 import '../../dashboard/presentation/dashboard_screen.dart';
 import '../../bug/data/bug_repository.dart';
+import '../../activity/data/activity_repository.dart';
+import '../../attachment/presentation/widgets/attachment_section_widget.dart';
 
 class AuditDetailScreen extends ConsumerStatefulWidget {
   final String projectId;
@@ -124,6 +126,37 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
       ref
           .read(projectTreeProvider(widget.projectId).notifier)
           .updateFunctionAudit(widget.moduleId, widget.featureId, widget.functionId, savedAudit);
+
+      // Log activity
+      String desc = 'Audit untuk "${widget.functionName}" diperbarui: ';
+      final List<String> changes = [];
+      if (widget.initialAudit == null) {
+        desc = 'Audit baru dibuat untuk "${widget.functionName}" dengan status $_status';
+      } else {
+        if (widget.initialAudit!.status != _status) {
+          changes.add('status menjadi $_status');
+        }
+        if (widget.initialAudit!.priority != _priority) {
+          changes.add('prioritas menjadi ${_priority ?? "None"}');
+        }
+        if (widget.initialAudit!.notes != (_notesController.text.trim().isEmpty ? null : _notesController.text.trim())) {
+          changes.add('catatan diperbarui');
+        }
+        if (changes.isEmpty) {
+          desc += 'informasi auditor diperbarui';
+        } else {
+          desc += changes.join(', ');
+        }
+      }
+
+      ref.read(activityRepositoryProvider).logActivity(
+        projectId: widget.projectId,
+        entityType: 'Audit',
+        entityId: savedAudit.id,
+        entityName: widget.functionName,
+        action: widget.initialAudit == null ? 'Create' : 'Update',
+        description: desc,
+      );
 
       // Invalidate dashboard stats & activity logs
       ref.invalidate(projectListProvider);
@@ -415,6 +448,18 @@ class _AuditDetailScreenState extends ConsumerState<AuditDetailScreen> {
                         ),
                       ],
                     ),
+
+                    // Attachments Section
+                    if (widget.initialAudit != null) ...[
+                      const SizedBox(height: 48),
+                      const Divider(),
+                      const SizedBox(height: 24),
+                      AttachmentSectionWidget(
+                        auditId: widget.initialAudit!.id,
+                        projectId: widget.projectId,
+                        parentName: widget.functionName,
+                      ),
+                    ],
 
                     // Reported Bugs Section
                     if (widget.initialAudit != null) ...[

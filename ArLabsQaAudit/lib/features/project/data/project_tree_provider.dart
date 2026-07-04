@@ -8,6 +8,7 @@ import '../../feature/data/feature_repository.dart';
 import '../../function/domain/function_model.dart';
 import '../../function/data/function_repository.dart';
 import '../../audit/domain/audit_model.dart';
+import '../../activity/data/activity_repository.dart';
 
 // Structs to represent the assembled hierarchy tree
 class ProjectTreeData {
@@ -67,6 +68,7 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
   final ModuleRepository _moduleRepo;
   final FeatureRepository _featureRepo;
   final FunctionRepository _functionRepo;
+  final Ref _ref;
 
   ProjectTreeNotifier({
     required String projectId,
@@ -74,11 +76,13 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
     required ModuleRepository moduleRepo,
     required FeatureRepository featureRepo,
     required FunctionRepository functionRepo,
+    required Ref ref,
   })  : _projectId = projectId,
         _projectRepo = projectRepo,
         _moduleRepo = moduleRepo,
         _featureRepo = featureRepo,
         _functionRepo = functionRepo,
+        _ref = ref,
         super(const AsyncValue.loading()) {
     loadTree();
   }
@@ -132,6 +136,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
       state = AsyncValue.data(currentData.copyWith(
         modules: [...currentData.modules, newNode],
       ));
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Module',
+        entityId: newModule.id,
+        entityName: newModule.name,
+        action: 'Create',
+        description: 'Modul "${newModule.name}" berhasil dibuat',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -151,6 +164,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
           return m;
         }).toList(),
       ));
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Module',
+        entityId: module.id,
+        entityName: module.name,
+        action: 'Update',
+        description: 'Modul "${module.name}" diperbarui',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -161,10 +183,20 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
     if (currentData == null) return;
 
     try {
+      final name = currentData.modules.firstWhere((m) => m.module.id == moduleId).module.name;
       await _moduleRepo.deleteModule(moduleId);
       state = AsyncValue.data(currentData.copyWith(
         modules: currentData.modules.where((m) => m.module.id != moduleId).toList(),
       ));
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Module',
+        entityId: moduleId,
+        entityName: name,
+        action: 'Delete',
+        description: 'Modul "$name" dihapus beserta seluruh fitur di dalamnya',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -195,6 +227,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
 
     try {
       await _moduleRepo.reorderModules(updatedNodes.map((n) => n.module).toList());
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Module',
+        entityId: _projectId,
+        entityName: currentData.project.name,
+        action: 'Reorder',
+        description: 'Urutan modul pada proyek "${currentData.project.name}" telah diatur ulang',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -226,6 +267,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
           return m;
         }).toList(),
       ));
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Feature',
+        entityId: newFeature.id,
+        entityName: newFeature.name,
+        action: 'Create',
+        description: 'Fitur "${newFeature.name}" berhasil dibuat',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -252,6 +302,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
           return m;
         }).toList(),
       ));
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Feature',
+        entityId: feature.id,
+        entityName: feature.name,
+        action: 'Update',
+        description: 'Fitur "${feature.name}" diperbarui',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -262,6 +321,8 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
     if (currentData == null) return;
 
     try {
+      final mNode = currentData.modules.firstWhere((m) => m.module.id == moduleId);
+      final name = mNode.features.firstWhere((f) => f.feature.id == featureId).feature.name;
       await _featureRepo.deleteFeature(featureId);
       state = AsyncValue.data(currentData.copyWith(
         modules: currentData.modules.map((m) {
@@ -273,6 +334,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
           return m;
         }).toList(),
       ));
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Feature',
+        entityId: featureId,
+        entityName: name,
+        action: 'Delete',
+        description: 'Fitur "$name" dihapus beserta seluruh fungsi di dalamnya',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -308,6 +378,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
 
     try {
       await _featureRepo.reorderFeatures(updatedFeatures.map((f) => f.feature).toList());
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Feature',
+        entityId: moduleId,
+        entityName: moduleNode.module.name,
+        action: 'Reorder',
+        description: 'Urutan fitur pada modul "${moduleNode.module.name}" telah diatur ulang',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -346,6 +425,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
           return m;
         }).toList(),
       ));
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Function',
+        entityId: newFunction.id,
+        entityName: newFunction.name,
+        action: 'Create',
+        description: 'Fungsi "${newFunction.name}" berhasil dibuat',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -374,6 +462,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
           return m;
         }).toList(),
       ));
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Function',
+        entityId: function.id,
+        entityName: function.name,
+        action: 'Update',
+        description: 'Fungsi "${function.name}" diperbarui',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -384,6 +481,9 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
     if (currentData == null) return;
 
     try {
+      final mNode = currentData.modules.firstWhere((m) => m.module.id == moduleId);
+      final fNode = mNode.features.firstWhere((f) => f.feature.id == featureId);
+      final name = fNode.functions.firstWhere((fn) => fn.id == functionId).name;
       await _functionRepo.deleteFunction(functionId);
       state = AsyncValue.data(currentData.copyWith(
         modules: currentData.modules.map((m) {
@@ -402,6 +502,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
           return m;
         }).toList(),
       ));
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Function',
+        entityId: functionId,
+        entityName: name,
+        action: 'Delete',
+        description: 'Fungsi "$name" dihapus dari daftar audit',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -445,6 +554,15 @@ class ProjectTreeNotifier extends StateNotifier<AsyncValue<ProjectTreeData>> {
 
     try {
       await _functionRepo.reorderFunctions(updatedFunctions);
+
+      _ref.read(activityRepositoryProvider).logActivity(
+        projectId: _projectId,
+        entityType: 'Function',
+        entityId: featureId,
+        entityName: featureNode.feature.name,
+        action: 'Reorder',
+        description: 'Urutan fungsi pada fitur "${featureNode.feature.name}" telah diatur ulang',
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -492,5 +610,6 @@ final projectTreeProvider = StateNotifierProvider.family<ProjectTreeNotifier, As
     moduleRepo: moduleRepo,
     featureRepo: featureRepo,
     functionRepo: functionRepo,
+    ref: ref,
   );
 });
