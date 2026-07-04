@@ -9,6 +9,8 @@ import '../../features/audit/domain/audit_model.dart';
 import '../../features/bug/presentation/bugs_screen.dart';
 import '../../features/bug/presentation/bug_detail_screen.dart';
 import '../../features/bug/presentation/bug_form_screen.dart';
+import '../../features/report/presentation/reports_screen.dart';
+import '../../features/report/presentation/project_report_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -128,6 +130,19 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/settings',
           builder: (context, state) => const SettingsScreen(),
+        ),
+        GoRoute(
+          path: '/reports',
+          builder: (context, state) => const ReportsScreen(),
+          routes: [
+            GoRoute(
+              path: ':projectId',
+              builder: (context, state) {
+                final projectId = state.pathParameters['projectId']!;
+                return ProjectReportScreen(projectId: projectId);
+              },
+            ),
+          ],
         ),
       ],
     ),

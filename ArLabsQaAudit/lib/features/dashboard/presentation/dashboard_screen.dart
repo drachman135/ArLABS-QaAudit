@@ -13,6 +13,7 @@ import '../../activity/data/activity_repository.dart';
 import '../../activity/domain/activity_model.dart';
 import '../../activity/presentation/widgets/activity_timeline_widget.dart';
 import '../../activity/presentation/widgets/activity_filter_bar.dart';
+import '../../report/data/report_repository.dart';
 
 final recentAuditsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final repository = ref.watch(auditRepositoryProvider);
@@ -208,6 +209,14 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               _buildBugCharts(context, ref, isDark, theme),
               const SizedBox(height: 40),
+              _SectionHeader(title: 'Proyek Teratas (Top Progres)', action: null, onAction: null),
+              const SizedBox(height: 12),
+              _buildTopProjectsList(context, ref, isDark, theme),
+              const SizedBox(height: 40),
+              _SectionHeader(title: 'Laporan Terbaru (Recent Reports)', action: null, onAction: null),
+              const SizedBox(height: 12),
+              _buildRecentReportsList(context, ref, isDark, theme),
+              const SizedBox(height: 40),
               _SectionHeader(title: 'Aksi Cepat', action: null, onAction: null),
               const SizedBox(height: 12),
               _buildQuickActions(context, ref),
@@ -229,6 +238,14 @@ class DashboardScreen extends ConsumerWidget {
         _SectionHeader(title: 'Distribusi Bug', action: 'Lihat Bug', onAction: () => context.go('/bugs')),
         const SizedBox(height: 12),
         _buildBugCharts(context, ref, isDark, theme),
+        const SizedBox(height: 40),
+        _SectionHeader(title: 'Proyek Teratas (Top Progres)', action: null, onAction: null),
+        const SizedBox(height: 12),
+        _buildTopProjectsList(context, ref, isDark, theme),
+        const SizedBox(height: 40),
+        _SectionHeader(title: 'Laporan Terbaru (Recent Reports)', action: null, onAction: null),
+        const SizedBox(height: 12),
+        _buildRecentReportsList(context, ref, isDark, theme),
         const SizedBox(height: 40),
         _SectionHeader(title: 'Aktivitas Terkini', action: null, onAction: null),
         const SizedBox(height: 12),
@@ -381,6 +398,216 @@ class DashboardScreen extends ConsumerWidget {
           error: (_, __) => const SizedBox.shrink(),
         ),
       ],
+    );
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Top Projects (Top Progres)
+  // ──────────────────────────────────────────────────────────────────────────
+  Widget _buildTopProjectsList(BuildContext context, WidgetRef ref, bool isDark, ThemeData theme) {
+    final projectsAsync = ref.watch(projectListProvider);
+    return projectsAsync.when(
+      data: (projects) {
+        if (projects.isEmpty) {
+          return _EmptyBox(
+            icon: Icons.analytics_outlined,
+            label: 'Belum ada proyek terdaftar.',
+            action: null,
+            onAction: null,
+            isDark: isDark,
+          );
+        }
+
+        // Sort by progress descending
+        final sorted = List<ProjectWithStats>.from(projects);
+        sorted.sort((a, b) => b.stats.progressPercentage.compareTo(a.stats.progressPercentage));
+        final topProjects = sorted.take(3).toList();
+
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF0D0F16) : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isDark ? const Color(0xFF1C2033) : const Color(0xFFE3E8F0),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            children: topProjects.map((p) {
+              final isLast = p == topProjects.last;
+              final progress = p.stats.progressPercentage;
+              final color = ProjectDialogs.getColor(p.project.color);
+              final icon = ProjectDialogs.getIconData(p.project.icon);
+
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  border: !isLast
+                      ? Border(
+                          bottom: BorderSide(
+                            color: isDark ? const Color(0xFF141826) : const Color(0xFFEEF2F8),
+                          ),
+                        )
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(icon, color: color, size: 14),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.project.name,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(2),
+                            child: LinearProgressIndicator(
+                              value: progress / 100,
+                              minHeight: 3,
+                              backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                              color: AppTheme.statusPassed,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      '${progress.toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.statusPassed,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Recent Reports
+  // ──────────────────────────────────────────────────────────────────────────
+  Widget _buildRecentReportsList(BuildContext context, WidgetRef ref, bool isDark, ThemeData theme) {
+    final recentReportsAsync = ref.watch(recentExportsProvider);
+    return recentReportsAsync.when(
+      data: (reports) {
+        if (reports.isEmpty) {
+          return _EmptyBox(
+            icon: Icons.history_rounded,
+            label: 'Belum ada ekspor laporan terbaru.',
+            action: null,
+            onAction: null,
+            isDark: isDark,
+          );
+        }
+
+        final recent = reports.take(3).toList();
+
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF0D0F16) : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isDark ? const Color(0xFF1C2033) : const Color(0xFFE3E8F0),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            children: recent.map((r) {
+              final isLast = r == recent.last;
+              
+              IconData icon;
+              Color color;
+              switch (r.fileFormat.toUpperCase()) {
+                case 'PDF':
+                  icon = Icons.picture_as_pdf_rounded;
+                  color = const Color(0xFFEF4444);
+                  break;
+                case 'EXCEL':
+                  icon = Icons.table_view_rounded;
+                  color = const Color(0xFF10B981);
+                  break;
+                default:
+                  icon = Icons.description_rounded;
+                  color = const Color(0xFF64748B);
+              }
+
+              final timeStr = '${r.createdAt.day}/${r.createdAt.month}/${r.createdAt.year}';
+
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  border: !isLast
+                      ? Border(
+                          bottom: BorderSide(
+                            color: isDark ? const Color(0xFF141826) : const Color(0xFFEEF2F8),
+                          ),
+                        )
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.08),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: color, size: 14),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${r.exportType} (${r.fileFormat})',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Proyek: ${r.projectName ?? "-"} • $timeStr',
+                            style: const TextStyle(fontSize: 10, color: Colors.grey),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 

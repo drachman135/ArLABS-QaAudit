@@ -160,3 +160,14 @@ CREATE TABLE IF NOT EXISTS activities (
 
 CREATE INDEX IF NOT EXISTS idx_activities_project_id ON activities(project_id);
 CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at DESC);
+
+-- 9. Exports Table
+CREATE TABLE IF NOT EXISTS exports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
+  export_type TEXT NOT NULL, -- 'All Projects', 'Project', 'Module', 'Feature', 'Bug List', 'Audit List'
+  file_format TEXT NOT NULL, -- 'PDF', 'Excel', 'CSV'
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_exports_project_id ON exports(project_id);

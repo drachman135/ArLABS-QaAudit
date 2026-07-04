@@ -16,6 +16,7 @@ class ResponsiveLayout extends StatelessWidget {
     _NavDef(label: 'Beranda',       path: '/',         icon: Icons.home_outlined,         activeIcon: Icons.home_rounded),
     _NavDef(label: 'Proyek',        path: '/projects', icon: Icons.folder_open_outlined,  activeIcon: Icons.folder_rounded),
     _NavDef(label: 'Laporan Bug',   path: '/bugs',     icon: Icons.bug_report_outlined,   activeIcon: Icons.bug_report_rounded),
+    _NavDef(label: 'Laporan',       path: '/reports',  icon: Icons.analytics_outlined,    activeIcon: Icons.analytics_rounded),
     _NavDef(label: 'Pengaturan',    path: '/settings', icon: Icons.settings_outlined,     activeIcon: Icons.settings_rounded),
   ];
 
@@ -118,7 +119,7 @@ class _TopNavBar extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'v1.3.0 · Phase 3',
+                'v1.5.0 · Phase 5',
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,

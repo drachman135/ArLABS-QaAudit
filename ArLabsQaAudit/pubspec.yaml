@@ -38,6 +38,8 @@ dependencies:
   uuid: ^4.3.3
   google_fonts: ^6.2.1
   file_picker: ^8.1.2
+  pdf: ^3.10.8
+  excel: ^4.0.6
 
 dev_dependencies:
   flutter_test:
