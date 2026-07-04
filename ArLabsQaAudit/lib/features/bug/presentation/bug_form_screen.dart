@@ -145,6 +145,47 @@ class _BugFormScreenState extends ConsumerState<BugFormScreen> {
     });
   }
 
+  String _getProjectName(List<ProjectWithStats> projects, String id) {
+    try {
+      return projects.firstWhere((p) => p.project.id == id).project.name;
+    } catch (_) {
+      return id;
+    }
+  }
+
+  String _getModuleName(List<ProjectWithStats> projects, String projId, String modId) {
+    try {
+      final p = projects.firstWhere((p) => p.project.id == projId);
+      final m = p.rawModulesJson.firstWhere((m) => m['id'] == modId);
+      return m['name'] as String;
+    } catch (_) {
+      return modId;
+    }
+  }
+
+  String _getFeatureName(List<ProjectWithStats> projects, String projId, String modId, String featId) {
+    try {
+      final p = projects.firstWhere((p) => p.project.id == projId);
+      final m = p.rawModulesJson.firstWhere((m) => m['id'] == modId);
+      final f = (m['features'] as List).firstWhere((f) => f['id'] == featId);
+      return f['name'] as String;
+    } catch (_) {
+      return featId;
+    }
+  }
+
+  String _getFunctionName(List<ProjectWithStats> projects, String projId, String modId, String featId, String funcId) {
+    try {
+      final p = projects.firstWhere((p) => p.project.id == projId);
+      final m = p.rawModulesJson.firstWhere((m) => m['id'] == modId);
+      final f = (m['features'] as List).firstWhere((f) => f['id'] == featId);
+      final fn = (f['functions'] as List).firstWhere((fn) => fn['id'] == funcId);
+      return fn['name'] as String;
+    } catch (_) {
+      return funcId;
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     
@@ -263,10 +304,33 @@ class _BugFormScreenState extends ConsumerState<BugFormScreen> {
                       ),
                       const SizedBox(height: 16),
                       if (_isContextLocked) ...[
-                        _buildLockedHierarchyRow('Project', widget.projectId ?? ''),
-                        _buildLockedHierarchyRow('Module', widget.moduleId ?? ''),
-                        _buildLockedHierarchyRow('Feature', widget.featureId ?? ''),
-                        _buildLockedHierarchyRow('Function', widget.functionId ?? ''),
+                        projectsAsync.when(
+                          data: (projects) {
+                            final projName = _getProjectName(projects, widget.projectId ?? '');
+                            final modName = _getModuleName(projects, widget.projectId ?? '', widget.moduleId ?? '');
+                            final featName = _getFeatureName(projects, widget.projectId ?? '', widget.moduleId ?? '', widget.featureId ?? '');
+                            final funcName = _getFunctionName(projects, widget.projectId ?? '', widget.moduleId ?? '', widget.featureId ?? '', widget.functionId ?? '');
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLockedHierarchyRow('Project', projName),
+                                _buildLockedHierarchyRow('Module', modName),
+                                _buildLockedHierarchyRow('Feature', featName),
+                                _buildLockedHierarchyRow('Function', funcName),
+                              ],
+                            );
+                          },
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (err, st) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLockedHierarchyRow('Project', widget.projectId ?? ''),
+                              _buildLockedHierarchyRow('Module', widget.moduleId ?? ''),
+                              _buildLockedHierarchyRow('Feature', widget.featureId ?? ''),
+                              _buildLockedHierarchyRow('Function', widget.functionId ?? ''),
+                            ],
+                          ),
+                        ),
                       ] else ...[
                         projectsAsync.when(
                           data: (projects) {

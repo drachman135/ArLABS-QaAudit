@@ -279,6 +279,34 @@ class ProjectsScreen extends ConsumerWidget {
                   ),
                   Row(
                     children: [
+                      if (stats.bugCount > 0) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: const Color(0xFFEF4444).withOpacity(0.2),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.bug_report_rounded, size: 10, color: Color(0xFFEF4444)),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${stats.bugCount}',
+                                style: const TextStyle(
+                                  color: Color(0xFFEF4444),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
@@ -406,6 +434,26 @@ class ProjectsScreen extends ConsumerWidget {
                   _buildStatItem(context, 'Belum Diuji', stats.notTestedCount.toString()),
                 ],
               ),
+              if (stats.bugCount > 0) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(Icons.bug_report_rounded, size: 12, color: Color(0xFFEF4444)),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${stats.bugCount} Bugs: ',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFEF4444)),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Critical ${stats.criticalBugs} · High ${stats.highBugs} · Medium ${stats.mediumBugs} · Low ${stats.lowBugs}',
+                        style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
 
               const SizedBox(height: 12),
               const Divider(height: 1),
